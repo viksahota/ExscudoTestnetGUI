@@ -1,7 +1,6 @@
 # ExscudoTestnetGUI
 Unofficial tool for Exscudo testnet client
-
-V.Sahota Oct 2017
+exscudo slack : gassman
 
 The tool provides a GUI interface to the Windows Exscudo testnet client.  It allow pushbutton access to eon.exe commands
 and implements a basic wallet and transactions display.
@@ -29,5 +28,5 @@ On first start;
 
 
 Once this is done, the balances in the wallet should soon begin to show correctly rather than report 404.
-Menu also has shortcuts to open Explorer in the working folder, and launch command line to eon or openssl.
+Menu also has some handy shortcuts to open Explorer in the working folder, and launch command line to eon or openssl.
 
