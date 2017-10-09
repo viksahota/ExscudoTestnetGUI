@@ -103,6 +103,7 @@
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.importConfigjsonToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exportConfigjsonToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.quitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cMDToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.eonCommandLineToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.opensslCommandLineToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -111,7 +112,6 @@
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panel1 = new System.Windows.Forms.Panel();
-            this.quitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.walletTab.SuspendLayout();
@@ -140,11 +140,11 @@
             // 
             // debugTB
             // 
-            this.debugTB.Location = new System.Drawing.Point(18, 70);
+            this.debugTB.Location = new System.Drawing.Point(18, 41);
             this.debugTB.Multiline = true;
             this.debugTB.Name = "debugTB";
             this.debugTB.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.debugTB.Size = new System.Drawing.Size(1469, 600);
+            this.debugTB.Size = new System.Drawing.Size(1460, 629);
             this.debugTB.TabIndex = 0;
             // 
             // commitBTN
@@ -159,7 +159,7 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(1378, 25);
+            this.button1.Location = new System.Drawing.Point(1391, 15);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(109, 39);
             this.button1.TabIndex = 7;
@@ -252,7 +252,6 @@
             // 
             // groupBox2
             // 
-            this.groupBox2.Controls.Add(this.button1);
             this.groupBox2.Controls.Add(this.debugTB);
             this.groupBox2.Location = new System.Drawing.Point(18, 339);
             this.groupBox2.Name = "groupBox2";
@@ -859,6 +858,7 @@
             // 
             // logTab
             // 
+            this.logTab.Controls.Add(this.button1);
             this.logTab.Controls.Add(this.logTB);
             this.logTab.Location = new System.Drawing.Point(4, 29);
             this.logTab.Name = "logTab";
@@ -869,11 +869,11 @@
             // 
             // logTB
             // 
-            this.logTB.Location = new System.Drawing.Point(14, 26);
+            this.logTB.Location = new System.Drawing.Point(14, 71);
             this.logTB.Multiline = true;
             this.logTB.Name = "logTB";
             this.logTB.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.logTB.Size = new System.Drawing.Size(1486, 1016);
+            this.logTB.Size = new System.Drawing.Size(1486, 971);
             this.logTB.TabIndex = 8;
             // 
             // pubkeyTB
@@ -947,6 +947,13 @@
             this.exportConfigjsonToolStripMenuItem.Text = "Export config.json";
             this.exportConfigjsonToolStripMenuItem.Click += new System.EventHandler(this.ExportConfigjsonToolStripMenuItem_Click);
             // 
+            // quitToolStripMenuItem
+            // 
+            this.quitToolStripMenuItem.Name = "quitToolStripMenuItem";
+            this.quitToolStripMenuItem.Size = new System.Drawing.Size(244, 30);
+            this.quitToolStripMenuItem.Text = "Quit";
+            this.quitToolStripMenuItem.Click += new System.EventHandler(this.quitToolStripMenuItem_Click);
+            // 
             // cMDToolStripMenuItem
             // 
             this.cMDToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -1013,23 +1020,18 @@
             this.panel1.Size = new System.Drawing.Size(1549, 50);
             this.panel1.TabIndex = 14;
             // 
-            // quitToolStripMenuItem
-            // 
-            this.quitToolStripMenuItem.Name = "quitToolStripMenuItem";
-            this.quitToolStripMenuItem.Size = new System.Drawing.Size(244, 30);
-            this.quitToolStripMenuItem.Text = "Quit";
-            this.quitToolStripMenuItem.Click += new System.EventHandler(this.quitToolStripMenuItem_Click);
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.AutoSize = true;
             this.ClientSize = new System.Drawing.Size(1549, 1196);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.menuStrip1);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
             this.MainMenuStrip = this.menuStrip1;
+            this.MaximizeBox = false;
+            this.MinimizeBox = false;
             this.Name = "Form1";
             this.Text = "Exscudo Testnet GUI";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);

@@ -628,7 +628,7 @@ namespace ExscudoTestnetGUI
 
         private void Button1_Click(object sender, EventArgs e)
         {
-            debugTB.Text = "";
+           logTB.Text = "";
         }
 
         private void ReadConfigBTN_Click(object sender, EventArgs e)
