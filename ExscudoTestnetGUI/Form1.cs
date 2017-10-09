@@ -27,6 +27,7 @@ namespace ExscudoTestnetGUI
         delegate void SetAccountInfoCallback(string text);
         delegate void SetBalanceUpdateCallback(string text);
         delegate void SetUpdateCommitedCallback(string text);
+        delegate void SetBackupRestoreCallback();
 
         //trips once per start to dispaly a message in debugTB if the account looks like its not registered with exscudo
         bool registerWarning = false;
@@ -296,14 +297,85 @@ namespace ExscudoTestnetGUI
                 DebugMsg("~~~  New account has been created - register it with Exscudo. You will need these details : ~~~\r\nYour email\r\nYour account ID : " + accountString + "\r\nYour public key : " + pubkeyString + "\r\n" + @"Register at :  https://testnet.eontechnology.org/" + "\r\n");
                 DebugMsg("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n");
 
-                //we've shown the message once, its enough.  supress further.
-                registerWarning = true;
+                BackupRestore();
+                
+                    //we've shown the message once, its enough.  supress further.
+                    registerWarning = true;
 
             }
 
         }
 
-        private void UpdateAccountInfo(string res)
+        private void BackupRestore()
+        {
+            if (accountTB.InvokeRequired)
+            {
+                SetBackupRestoreCallback d = new SetBackupRestoreCallback(BackupRestore);
+                this.Invoke(d, new object[] {});
+            }
+            else
+            {
+                //present a dialog offering to import an existing json.conf , or export the new one for safekeeping (it will be deleted each time application updates)
+                //MessageBox.Show();
+                DialogResult queryRes1;
+                using (DialogCenteringService centeringService = new DialogCenteringService(this)) // center message box
+                {
+                    queryRes1 = MessageBox.Show("New account created - it will need registering with Exscudo\r\nCheck the debug view for details then use the menu shortcut to reach the registration page\r\n\r\nIts recommended to save your new config.json somewhere safe since it will be deleted each time the application updates. (you can restore it by importing your backup).\r\n\r\nBackup your new config.json now ?", "New account", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                }
+
+                if (queryRes1 == DialogResult.Yes)
+                {
+                    //backup the new config.json
+                    //export the json file somewhere.
+                    SaveFileDialog jsonDG = new SaveFileDialog
+                    {
+                        Filter = "json files (*.json)|*.json",
+                        FilterIndex = 1,
+                        RestoreDirectory = true
+                    };
+
+                    try
+                    {
+                        if (jsonDG.ShowDialog() == DialogResult.OK)
+                        {
+
+                            string filename = jsonDG.FileName;
+
+                            string jsonData = JsonConvert.SerializeObject(conf);
+                            File.WriteAllText(filename, jsonData);
+                            DebugMsg("File export OK\r\n");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        DebugMsg("Error exporting config file  : " + ex.Message + "\r\n");
+                    }
+
+                }
+                else
+                {
+                    //offer to import an existing .json
+                    DialogResult queryRes2;
+                    using (DialogCenteringService centeringService = new DialogCenteringService(this)) // center message box
+                    {
+                        queryRes2 = MessageBox.Show("Import an existing account (config.json) ?", "Account import", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                    }
+
+                    if (queryRes2 == DialogResult.Yes)
+                    {
+                        ImportJson();
+                    }
+                    else
+                    {
+
+                    }
+                }
+
+
+            }
+        }
+
+                private void UpdateAccountInfo(string res)
         {
             if (accountTB.InvokeRequired)
             {
@@ -659,12 +731,9 @@ namespace ExscudoTestnetGUI
             Directory.SetCurrentDirectory(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
         }
 
-        private void ImportConfigjsonToolStripMenuItem_Click(object sender, EventArgs e)
+        private void ImportJson()
         {
             //import a json file, overwrites existing one
-
-
-            //Stream myStream = null;
             OpenFileDialog importDG = new OpenFileDialog
             {
                 InitialDirectory = "c:\\",
@@ -684,7 +753,7 @@ namespace ExscudoTestnetGUI
                     {
                         conf = JsonConvert.DeserializeObject<configClass>(newJSON);
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         DebugMsg("Error deserializing json file - bad format?\r\n");
                     }
@@ -695,7 +764,7 @@ namespace ExscudoTestnetGUI
                     WriteConfig();
 
                     //get the account info and populate the GUI
-                    debugTB.Text="";
+                    debugTB.Text = "";
                     string res = EonCMD("eon info");
                     UpdateAccountInfo(res);
                     registerWarning = false;
@@ -709,14 +778,18 @@ namespace ExscudoTestnetGUI
                     DebugMsg("Error: Could not read file. [ " + ex.Message + "]");
                 }
             }
+        }
 
+        private void ImportConfigjsonToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+            ImportJson();
 
         }
 
         private void ExportConfigjsonToolStripMenuItem_Click(object sender, EventArgs e)
         {
             //export the json file somewhere.
-
             SaveFileDialog jsonDG = new SaveFileDialog
             {
                 Filter = "json files (*.json)|*.json",
