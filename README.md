@@ -1,5 +1,6 @@
 # ExscudoTestnetGUI
 Unofficial tool for Exscudo testnet client
+
 exscudo slack : gassman
 
 The tool provides a GUI interface to the Windows Exscudo testnet client.  It allow pushbutton access to eon.exe commands
@@ -24,7 +25,6 @@ On first start;
 3.An account will be created and the details reported in debug view. You can use the menu item "Tools>Open Exscudo registration website" and then copy/paste the details. 
 
   > If you have an existing account , and hence config.json , you can import it from the menu.
-
 
 
 Once this is done, the balances in the wallet should soon begin to show correctly rather than report 404.
