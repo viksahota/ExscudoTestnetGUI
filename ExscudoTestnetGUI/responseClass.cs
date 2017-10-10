@@ -9,7 +9,7 @@ using Newtonsoft.Json.Linq;
 namespace ExscudoTestnetGUI
 {
 
-    internal partial class responseClass
+    internal partial class ResponseClass
     {
         internal class State2
         {
@@ -22,7 +22,7 @@ namespace ExscudoTestnetGUI
         }
     }
 
-    internal partial class responseClass
+    internal partial class ResponseClass
     {
 
         [JsonProperty("state")]

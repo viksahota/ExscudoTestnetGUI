@@ -112,6 +112,7 @@
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.uncommitBTN = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.walletTab.SuspendLayout();
@@ -151,9 +152,9 @@
             // 
             this.commitBTN.Location = new System.Drawing.Point(21, 29);
             this.commitBTN.Name = "commitBTN";
-            this.commitBTN.Size = new System.Drawing.Size(153, 48);
+            this.commitBTN.Size = new System.Drawing.Size(216, 48);
             this.commitBTN.TabIndex = 5;
-            this.commitBTN.Text = "Get Transactions";
+            this.commitBTN.Text = "Commited Transactions";
             this.commitBTN.UseVisualStyleBackColor = true;
             this.commitBTN.Click += new System.EventHandler(this.CommitBTN_Click);
             // 
@@ -238,7 +239,6 @@
             this.label16.Size = new System.Drawing.Size(125, 37);
             this.label16.TabIndex = 3;
             this.label16.Text = "Deposit";
-            this.label16.Click += new System.EventHandler(this.Label16_Click);
             // 
             // depositLBL
             // 
@@ -307,7 +307,7 @@
             this.refillBTN.TabIndex = 5;
             this.refillBTN.Text = "> Refill >";
             this.refillBTN.UseVisualStyleBackColor = true;
-            this.refillBTN.Click += new System.EventHandler(this.refillBTN_Click);
+            this.refillBTN.Click += new System.EventHandler(this.RefillBTN_Click);
             // 
             // withdrawBTN
             // 
@@ -317,7 +317,7 @@
             this.withdrawBTN.TabIndex = 4;
             this.withdrawBTN.Text = "< Withdraw <";
             this.withdrawBTN.UseVisualStyleBackColor = true;
-            this.withdrawBTN.Click += new System.EventHandler(this.withdrawBTN_Click);
+            this.withdrawBTN.Click += new System.EventHandler(this.WithdrawBTN_Click);
             // 
             // groupBox6
             // 
@@ -373,7 +373,7 @@
             this.txSendBTN.TabIndex = 3;
             this.txSendBTN.Text = "Send";
             this.txSendBTN.UseVisualStyleBackColor = true;
-            this.txSendBTN.Click += new System.EventHandler(this.txSendBTN_Click);
+            this.txSendBTN.Click += new System.EventHandler(this.TxSendBTN_Click);
             // 
             // groupBox5
             // 
@@ -769,6 +769,7 @@
             // 
             // tranactionsTab
             // 
+            this.tranactionsTab.Controls.Add(this.uncommitBTN);
             this.tranactionsTab.Controls.Add(this.transactionLV);
             this.tranactionsTab.Controls.Add(this.commitBTN);
             this.tranactionsTab.Location = new System.Drawing.Point(4, 29);
@@ -952,7 +953,7 @@
             this.quitToolStripMenuItem.Name = "quitToolStripMenuItem";
             this.quitToolStripMenuItem.Size = new System.Drawing.Size(244, 30);
             this.quitToolStripMenuItem.Text = "Quit";
-            this.quitToolStripMenuItem.Click += new System.EventHandler(this.quitToolStripMenuItem_Click);
+            this.quitToolStripMenuItem.Click += new System.EventHandler(this.QuitToolStripMenuItem_Click);
             // 
             // cMDToolStripMenuItem
             // 
@@ -991,7 +992,7 @@
             this.openExscudoRegistationWebsiteToolStripMenuItem.Name = "openExscudoRegistationWebsiteToolStripMenuItem";
             this.openExscudoRegistationWebsiteToolStripMenuItem.Size = new System.Drawing.Size(365, 30);
             this.openExscudoRegistationWebsiteToolStripMenuItem.Text = "Open Exscudo registation website";
-            this.openExscudoRegistationWebsiteToolStripMenuItem.Click += new System.EventHandler(this.openExscudoRegistationWebsiteToolStripMenuItem_Click);
+            this.openExscudoRegistationWebsiteToolStripMenuItem.Click += new System.EventHandler(this.OpenExscudoRegistationWebsiteToolStripMenuItem_Click);
             // 
             // helpToolStripMenuItem
             // 
@@ -1006,7 +1007,7 @@
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
             this.aboutToolStripMenuItem.Size = new System.Drawing.Size(147, 30);
             this.aboutToolStripMenuItem.Text = "About";
-            this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
+            this.aboutToolStripMenuItem.Click += new System.EventHandler(this.AboutToolStripMenuItem_Click);
             // 
             // panel1
             // 
@@ -1019,6 +1020,16 @@
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(1549, 50);
             this.panel1.TabIndex = 14;
+            // 
+            // uncommitBTN
+            // 
+            this.uncommitBTN.Location = new System.Drawing.Point(252, 29);
+            this.uncommitBTN.Name = "uncommitBTN";
+            this.uncommitBTN.Size = new System.Drawing.Size(216, 48);
+            this.uncommitBTN.TabIndex = 7;
+            this.uncommitBTN.Text = "Uncommited Transactions";
+            this.uncommitBTN.UseVisualStyleBackColor = true;
+            this.uncommitBTN.Click += new System.EventHandler(this.UncommitBTN_Click);
             // 
             // Form1
             // 
@@ -1164,6 +1175,7 @@
         private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem quitToolStripMenuItem;
+        private System.Windows.Forms.Button uncommitBTN;
     }
 }
 

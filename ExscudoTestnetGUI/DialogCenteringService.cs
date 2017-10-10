@@ -19,9 +19,8 @@ namespace ExscudoTestnetGUI
 
         public DialogCenteringService(IWin32Window owner)
         {
-            if (owner == null) throw new ArgumentNullException("owner");
-
-            this.owner = owner;
+            //null check
+            this.owner = owner ?? throw new ArgumentNullException("owner");
             hookProc = DialogHookProc;
 
             hHook = SetWindowsHookEx(WH_CALLWNDPROCRET, hookProc, IntPtr.Zero, GetCurrentThreadId());
@@ -87,13 +86,17 @@ namespace ExscudoTestnetGUI
             int width = recChild.Width - recChild.X;
             int height = recChild.Height - recChild.Y;
 
-            Point ptCenter = new Point(0, 0);
-            ptCenter.X = recParent.X + ((recParent.Width - recParent.X) / 2);
-            ptCenter.Y = recParent.Y + ((recParent.Height - recParent.Y) / 2);
+            Point ptCenter = new Point(0, 0)
+            {
+                X = recParent.X + ((recParent.Width - recParent.X) / 2),
+                Y = recParent.Y + ((recParent.Height - recParent.Y) / 2)
+            };
 
-            Point ptStart = new Point(0, 0);
-            ptStart.X = (ptCenter.X - (width / 2));
-            ptStart.Y = (ptCenter.Y - (height / 2));
+            Point ptStart = new Point(0, 0)
+            {
+                X = (ptCenter.X - (width / 2)),
+                Y = (ptCenter.Y - (height / 2))
+            };
 
             // get centered rectangle
             Rectangle centeredRectangle = new Rectangle(ptStart.X, ptStart.Y, width, height);

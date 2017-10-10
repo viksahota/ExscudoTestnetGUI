@@ -40,9 +40,26 @@ namespace ExscudoTestnetGUI
         {
             InitializeComponent();
 
+            Application.ThreadException += new ThreadExceptionEventHandler(Application_ThreadException);
+            AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
+
             //start the eon thread
             eonThread = new Thread(new ThreadStart(EonThreadStart));
             eonThread.Start();
+            
+        }
+
+        static void Application_ThreadException(object sender, ThreadExceptionEventArgs e)
+        {
+            // Log the exception, display it, etc
+            MessageBox.Show("ThreadException error.\r\n\r\nPlease submit screenshot for debug : \r\n\r\n" + e.Exception.Message, "Error - Terminating....", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+        }
+
+        static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            
+            // Log the exception, display it, etc
+            MessageBox.Show("Unhandled Exception error.\r\n\r\nPlease submit screenshot for debug : \r\n\r\n" + (e.ExceptionObject as Exception).Message , "Error - Terminating...." , MessageBoxButtons.OK , MessageBoxIcon.Exclamation);
             
         }
 
@@ -56,29 +73,55 @@ namespace ExscudoTestnetGUI
             DebugMsg("Working directory : " + Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\r\n");
 
             //init sequence
-            CheckInstall();
+            try
+            {
+                CheckInstall();
+            }
+            catch(Exception ex)
+            {
+                DebugMsg("Error during checkinstall :" + ex.Message + "\r\n");
+                LogMsg("Error during checkinstall :" + ex.Message + "\r\n");
+            }
 
             Thread.Sleep(100);
             //execute eon and display the info 
-            string inftext = EonCMD("eon");
-            InfoUpdate(inftext);
+            string eontext = EonCMD("eon");
+            if (eontext!="-1") InfoUpdate(eontext);
 
             //update config
             UpdateConfigDisplay();
 
             //get the account info and populate the GUI
-            string res = EonCMD("eon info");
-            UpdateAccountInfo(res);
+            string inftext = EonCMD("eon info");
+            if (inftext!="-1") UpdateAccountInfo(inftext);
 
             //get the account balance and update display
-            UpdateBalance(EonCMD("eon state"));
+            string stateResponse = EonCMD("eon state");
+            if (stateResponse!="-1") UpdateBalance(stateResponse);
+
+            int counter = 0;
+            DateTime lastBalancePollTime = DateTime.Now;
 
             while (eonThreadRun)
             {
-                Thread.Sleep(5000);
+                Thread.Sleep(50);
                 //every 5 seconds update the main account balance/deposit
                 //query EON
-                UpdateBalance(EonCMD("eon state",false));
+                TimeSpan elapsed = DateTime.Now - lastBalancePollTime;
+                if (elapsed.Seconds >= 5)
+                {
+                    stateResponse = EonCMD("eon state", false);
+                    if (stateResponse != "-1") UpdateBalance(stateResponse);
+                    lastBalancePollTime = DateTime.Now;
+
+                    counter++;
+                    if (counter >= 10)
+                    {
+                        GC.Collect();
+                        counter = 0;
+                    }
+                }
+
             }
         }
 
@@ -92,43 +135,52 @@ namespace ExscudoTestnetGUI
             }
             else
             {
-                //locate the braces containing json response
-                int ind1 = stateResponse.IndexOf('{');
-                int ind2 = (stateResponse.LastIndexOf('}'));
-
-                if (ind1!=-1 && ind2!=-1)
+                try
                 {
-                    string jsonResponse = stateResponse.Substring(ind1, ind2 - ind1 +1);
 
-                    //deserialise the response
-                    responseClass oResp = new responseClass();
-                    oResp = JsonConvert.DeserializeObject<responseClass>(jsonResponse);
+                    //locate the braces containing json response
+                    int ind1 = stateResponse.IndexOf('{');
+                    int ind2 = stateResponse.LastIndexOf('}');
 
-                    //report values if OK
-                    if (oResp.State.Code == 200)
+                    if ((stateResponse != "-1") && (!stateResponse.Contains("null")) && (ind1 != -1) && (ind2 != -1))
                     {
-                        balanceLBL.Text = oResp.Amount.ToString();
-                        depositLBL.Text = oResp.Deposit.ToString();
+                        string jsonResponse = stateResponse.Substring(ind1, ind2 - ind1 + 1);
 
-                    }
-                    else if (oResp.State.Code == 404)
-                    {
-                        balanceLBL.Text = "404: Account not found";
-                        depositLBL.Text = "404: Account not found";
+                        //deserialise the response
+                        ResponseClass oResp = new ResponseClass();
+                        oResp = JsonConvert.DeserializeObject<ResponseClass>(jsonResponse);
 
-                        //display message for user to register this info with exscudo....
-                        if (!registerWarning)
+                        //report values if OK
+                        if (oResp.State.Code == 200)
                         {
-                            DebugMsg("~~~  Your account cannot be found. To register it with Exscudo you will need these details : ~~~\r\nYour email\r\nYour account ID : " + accountTB.Text + "\r\nYour public key : " + pubkeyTB.Text + "\r\n" + @"Register at :  https://testnet.eontechnology.org/" + "\r\n");
-                            DebugMsg("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n");
-                            registerWarning = true;
-                        }
+                            balanceLBL.Text = oResp.Amount.ToString();
+                            depositLBL.Text = oResp.Deposit.ToString();
 
+                        }
+                        else if (oResp.State.Code == 404)
+                        {
+                            balanceLBL.Text = "404: Account not found";
+                            depositLBL.Text = "404: Account not found";
+
+                            //display message for user to register this info with exscudo....
+                            if (!registerWarning)
+                            {
+                                DebugMsg("~~~  Your account cannot be found. To register it with Exscudo you will need these details : ~~~\r\nYour email\r\nYour account ID : " + accountTB.Text + "\r\nYour public key : " + pubkeyTB.Text + "\r\n" + @"Register at :  https://testnet.eontechnology.org/" + "\r\n");
+                                DebugMsg("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n");
+                                registerWarning = true;
+                            }
+
+                        }
+                    }
+                    else
+                    {
+                        DebugMsg("Error checking balance, unexpected response : " + stateResponse);
                     }
                 }
-                else
+                catch (Exception ex)
                 {
-                    DebugMsg("Error checking balance : " + stateResponse);
+                    DebugMsg("Exception in UpdateBalance() - " + ex.Message);
+                    LogMsg("Exception in UpdateBalance() - " + ex.Message);
                 }
 
             }
@@ -156,6 +208,8 @@ namespace ExscudoTestnetGUI
                 }
                 catch (Exception ex)
                 {
+                    DebugMsg("Error deleting eon zip - " + ex.Message);
+                    LogMsg("Error deleting eon zip - " + ex.Message);
                 }
 
                 //remove the eon.cli.windows directory if its present
@@ -165,6 +219,8 @@ namespace ExscudoTestnetGUI
                 }
                 catch (Exception ex)
                 {
+                    DebugMsg("Error deleting eon folder - " + ex.Message);
+                    LogMsg("Error deleting eon folder - " + ex.Message);
                 }
 
                 //download and unpack eon
@@ -187,7 +243,7 @@ namespace ExscudoTestnetGUI
                     }
                     catch (Exception ex)
                     {
-                        DebugMsg("failed unpacking file\r\n");
+                        DebugMsg("Failed unpacking file" + ex.Message);
                         Thread.Sleep(100);
                     }
 
@@ -199,11 +255,13 @@ namespace ExscudoTestnetGUI
                     }
                     catch (Exception ex)
                     {
+                        DebugMsg("Error deleting eon zip - " + ex.Message);
+                        LogMsg("Error deleting eon zip - " + ex.Message);
                     }
                 }
                 catch (Exception ex)
                 {
-                    DebugMsg("failed to download eon.cli.windows.zip\r\n");
+                    DebugMsg("failed to download eon.cli.windows.zip : "  + ex.Message);
                     Thread.Sleep(100);
                 }
 
@@ -217,6 +275,8 @@ namespace ExscudoTestnetGUI
                 }
                 catch (Exception ex)
                 {
+                    DebugMsg("Error deleting openssl zip - " + ex.Message);
+                    LogMsg("Error deleting openssl zip - " + ex.Message);
                 }
 
                 //remove the openssl directory if its present
@@ -226,6 +286,8 @@ namespace ExscudoTestnetGUI
                 }
                 catch (Exception ex)
                 {
+                    DebugMsg("Error deleting openssl folder - " + ex.Message);
+                    LogMsg("Error deleting openssl folder - " + ex.Message);
                 }
 
                 //download and unpack openssl
@@ -247,7 +309,7 @@ namespace ExscudoTestnetGUI
                     }
                     catch (Exception ex)
                     {
-                        DebugMsg("failed unpacking openssl\r\n");
+                        DebugMsg("failed unpacking openssl : " + ex.Message);
                         Thread.Sleep(100);
                     }
 
@@ -258,6 +320,7 @@ namespace ExscudoTestnetGUI
                     }
                     catch (Exception ex)
                     {
+                        DebugMsg("failed deleting openssl zip: " + ex.Message);
                     }
 
 
@@ -265,7 +328,7 @@ namespace ExscudoTestnetGUI
                 }
                 catch (Exception ex)
                 {
-                    DebugMsg("failed to download openssl\r\n");
+                    DebugMsg("failed to download openssl: "  + ex.Message);
                     Thread.Sleep(330);
                 }
 
@@ -385,7 +448,7 @@ namespace ExscudoTestnetGUI
             }
         }
 
-                private void UpdateAccountInfo(string res)
+        private void UpdateAccountInfo(string res)
         {
             if (accountTB.InvokeRequired)
             {
@@ -393,20 +456,28 @@ namespace ExscudoTestnetGUI
                 this.Invoke(d, new object[] {res});
             }
             else
-            {               
-                int accInd1 = res.LastIndexOf("Account:") + 10;
-                int accInd2 = res.IndexOf(" ", accInd1);
-                string accountString = res.Substring(accInd1, accInd2 - accInd1);
-                accountString = accountString.Trim();
-                //debugMsg("Account ID : " + accountString + "\r\n");
+            {
+                try
+                {
+                    int accInd1 = res.LastIndexOf("Account:") + 10;
+                    int accInd2 = res.IndexOf(" ", accInd1);
+                    string accountString = res.Substring(accInd1, accInd2 - accInd1);
+                    accountString = accountString.Trim();
+                    //debugMsg("Account ID : " + accountString + "\r\n");
 
-                int pubkeyInd1 = res.LastIndexOf("key:") + 6;
-                int pubkeyInd2 = res.IndexOf("\r\n", pubkeyInd1);
-                string pubkeyString = res.Substring(pubkeyInd1, pubkeyInd2 - pubkeyInd1);
+                    int pubkeyInd1 = res.LastIndexOf("key:") + 6;
+                    int pubkeyInd2 = res.IndexOf("\r\n", pubkeyInd1);
+                    string pubkeyString = res.Substring(pubkeyInd1, pubkeyInd2 - pubkeyInd1);
 
-                accountTB.Text = accountString;
-                rxAddressLBL.Text = accountString;
-                pubkeyTB.Text = pubkeyString;
+                    accountTB.Text = accountString;
+                    rxAddressLBL.Text = accountString;
+                    pubkeyTB.Text = pubkeyString;
+                }
+                catch(Exception ex)
+                {
+                    DebugMsg("Exception in UpdateAccountInfo() - " + ex.Message);
+                    LogMsg("Exception in UpdateAccountInfo() - " + ex.Message);
+                }
             }
         }
 
@@ -418,15 +489,33 @@ namespace ExscudoTestnetGUI
                 this.Invoke(d, new object[] { commitResponse });
             }
             else
-            {                
-                //locate the braces containing json response
-                string jsonResponse = commitResponse.Substring(commitResponse.IndexOf('{'), (commitResponse.LastIndexOf('}') - commitResponse.IndexOf('{') + 1));
+            {
+                try
+                {
+                    //locate the braces containing json response
+                    int ind1 = commitResponse.IndexOf('{');
+                    int ind2 = commitResponse.LastIndexOf('}');
 
-                //deserialise the response
-                commitClass oResp = new commitClass();
-                oResp = JsonConvert.DeserializeObject<commitClass>(jsonResponse);
+                    if ((ind1 != -1) && (ind2 != -1) && (!commitResponse.Contains("null")) && (commitResponse != "-1"))
+                    {
+                        string jsonResponse = commitResponse.Substring(ind1, (ind2 - ind1 + 1));
 
-                this.transactionLV.SetObjects(oResp.All);
+                        //deserialise the response
+                        commitClass oResp = new commitClass();
+                        oResp = JsonConvert.DeserializeObject<commitClass>(jsonResponse);
+
+                        this.transactionLV.SetObjects(oResp.All);
+                    }
+                    else
+                    {
+                        DebugMsg("Error checking tranactions, unexpected  commit response : " + commitResponse);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    DebugMsg("Exception in UpdateCommited() - " + ex.Message);
+                    LogMsg("Exception in UpdateCommited() - " + ex.Message);
+                }
 
                 //string n = oResp.ToString();
 
@@ -442,47 +531,55 @@ namespace ExscudoTestnetGUI
             }
             else
             {
-                rootThreadsNM.Value = conf.Threads;
-                rootCoinTB.Text = conf.Coin;
-                rootNameTB.Text = conf.Name;
-
-                //remove the s from the interval and convert to int
-                string intString = conf.UpstreamCheckInterval;
-                intString = intString.Remove(intString.Length - 1, 1);
-                //int interval = intString;
-                int interval = Convert.ToInt16(intString);
-                rootIntervalNM.Value = interval;
-                //update the payouts enable checkbox
-                if (conf.Payouts.Enabled)
+                try
                 {
-                    payoutEnabledCB.Checked = true;
+                    rootThreadsNM.Value = conf.Threads;
+                    rootCoinTB.Text = conf.Coin;
+                    rootNameTB.Text = conf.Name;
+
+                    //remove the s from the interval and convert to int
+                    string intString = conf.UpstreamCheckInterval;
+                    intString = intString.Remove(intString.Length - 1, 1);
+                    //int interval = intString;
+                    int interval = Convert.ToInt16(intString);
+                    rootIntervalNM.Value = interval;
+                    //update the payouts enable checkbox
+                    if (conf.Payouts.Enabled)
+                    {
+                        payoutEnabledCB.Checked = true;
+                    }
+                    else
+                    {
+                        payoutEnabledCB.Checked = false;
+                    }
+
+                    //remove the m from the interval and convert to int
+                    string intString2 = conf.Payouts.Interval;
+                    intString2 = intString2.Remove(intString2.Length - 1, 1);
+                    int interval2 = Convert.ToInt16(intString2);
+                    payoutIntervalNM.Value = interval2;
+
+                    payoutPeerTB.Text = conf.Payouts.Peer;
+
+                    payoutSeedTB.Text = conf.Payouts.Seed;
+
+                    payoutDeadlineNM.Value = conf.Payouts.Deadline;
+
+                    payoutFeeNM.Value = conf.Payouts.Fee;
+
+                    //remove the s from the timeout and convert to int
+                    string intString3 = conf.Payouts.Timeout;
+                    intString3 = intString3.Remove(intString3.Length - 1, 1);
+                    int timeoutVal = Convert.ToInt16(intString3);
+                    payoutTimeoutNM.Value = timeoutVal;
+
+                    payoutThresholdNM.Value = conf.Payouts.Threshold;
                 }
-                else
+                catch(Exception ex)
                 {
-                    payoutEnabledCB.Checked = false;
+                    DebugMsg("Exception in UpdateConfigDisplay() - " + ex.Message);
+                    LogMsg("Exception in UpdateConfigDisplay() - " + ex.Message);
                 }
-
-                //remove the m from the interval and convert to int
-                string intString2 = conf.Payouts.Interval;
-                intString2 = intString2.Remove(intString2.Length - 1, 1);
-                int interval2 = Convert.ToInt16(intString2);
-                payoutIntervalNM.Value = interval2;
-
-                payoutPeerTB.Text = conf.Payouts.Peer;
-
-                payoutSeedTB.Text = conf.Payouts.Seed;
-
-                payoutDeadlineNM.Value = conf.Payouts.Deadline;
-
-                payoutFeeNM.Value = conf.Payouts.Fee;
-
-                //remove the s from the timeout and convert to int
-                string intString3 = conf.Payouts.Timeout;
-                intString3 = intString3.Remove(intString3.Length - 1, 1);
-                int timeoutVal = Convert.ToInt16(intString3);
-                payoutTimeoutNM.Value = timeoutVal;
-
-                payoutThresholdNM.Value = conf.Payouts.Threshold;
             }
 
         }
@@ -578,8 +675,11 @@ namespace ExscudoTestnetGUI
             }
             else
             {
-                infoLBL.Text = line;
-                infoLBL.Update();
+                if (line != "-1")
+                {
+                    infoLBL.Text = line;
+                    infoLBL.Update();
+                }
             }
         }
 
@@ -599,6 +699,7 @@ namespace ExscudoTestnetGUI
             catch(Exception ex)
             {
                 res = false;
+                DebugMsg("Failed opening/reading config :" + ex.Message);
             }
             return (res);
         }
@@ -609,10 +710,10 @@ namespace ExscudoTestnetGUI
             File.WriteAllText(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + @"\eon.cli.windows\config.json", jsonData);
         }
 
-        // ---------------------------------------------------------------
+        // returns the raw cmds response, or -1 for failure
         public string ExecuteCommandSync(object command)
         {
-            string result = "";
+            string result = "-1";
 
             try
             {
@@ -642,18 +743,20 @@ namespace ExscudoTestnetGUI
                 result = result.Replace("\n", "\r\n");
                 //LogMsg(result);
             }
-            catch (Exception objException)
+            catch (Exception ex)
             {
                 // Log the exception
+                DebugMsg("ExecuteCommandSync: Exception raised executing eon.exe  - " + ex.Message);
+                result = "-1";
             }
 
             return (result);
         }
-        //-------------------------------------------------------------
-
+ 
+        //return the raw command response , or -1 for fail. Wraps ExecuteCommandSync to allow exec in eon folder
         private string EonCMD(string cmd, bool enableLog)
         {
-            string res = "";
+            string res = "-1";
 
             try
             {
@@ -664,7 +767,8 @@ namespace ExscudoTestnetGUI
             }
             catch (Exception ex)
             {
-                DebugMsg("ERROR during EON command execution!");
+                DebugMsg("ERROR during EON command execution :\r\nCMD: " + cmd + "\r\n\r\nException: " + ex.Message);
+                res = "-1";
             }
                 return (res);
         }
@@ -674,71 +778,56 @@ namespace ExscudoTestnetGUI
             return(EonCMD(cmd, true));
         }
 
-        private void InfoBTN_Click(object sender, EventArgs e)
-        {
-            DebugMsg(EonCMD("eon info"));         
-        }
-
-        private void EonBTN_Click(object sender, EventArgs e)
-        {
-            DebugMsg(EonCMD("eon"));
-        }
-
-        private void StateBTN_Click(object sender, EventArgs e)
-        {
-            DebugMsg(EonCMD("eon state"));
-        }
-
-        private void State2BTN_Click(object sender, EventArgs e)
-        {
-            DebugMsg(EonCMD("eon state EON-3A43B-58N25-RFBBS"));
-        }
-
         private void CommitBTN_Click(object sender, EventArgs e)
         {
             string commitResponse = EonCMD("eon commit " + accountTB.Text);
-            File.WriteAllText("commitResponse.json", commitResponse);
-            UpdateCommited(commitResponse);
-
-           
+            if (commitResponse!="-1") UpdateCommited(commitResponse);           
         }
 
-        private void Commit2BTN_Click(object sender, EventArgs e)
-        {
-            DebugMsg(EonCMD("eon commit EON-3A43B-58N25-RFBBS"));
-        }
-
+        //clear log view
         private void Button1_Click(object sender, EventArgs e)
         {
            logTB.Text = "";
         }
 
-        private void ReadConfigBTN_Click(object sender, EventArgs e)
-        {
-            ReadConfig();
-        }
-
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             eonThreadRun = false;
+            Thread.Sleep(1);
         }
 
         private void EonCommandLineToolStripMenuItem_Click(object sender, EventArgs e)
         {
             //launch eon command line
-            Directory.SetCurrentDirectory(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + @"\eon.cli.windows");
-            Process.Start("cmd.exe", "/k");
-            Directory.SetCurrentDirectory(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
+            try
+            {
+                Directory.SetCurrentDirectory(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + @"\eon.cli.windows");
+                Process.Start("cmd.exe", "/k");
+                Directory.SetCurrentDirectory(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
+            }
+            catch(Exception ex)
 
+            {
+                DebugMsg("Exception trying to open eon command terminal - " + ex.Message + "\r\n");
+                LogMsg("Exception trying to open eon command terminal - " + ex.Message + "\r\n");
+            }
         }
 
         private void OpensslCommandLineToolStripMenuItem_Click(object sender, EventArgs e)
         {
             //launch openssl command line
-            //launch eon command line
+            try
+            { 
             Directory.SetCurrentDirectory(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + @"\openssl-0.9.8r-x64_86-win64-rev2");
             Process.Start("cmd.exe", "/k");
             Directory.SetCurrentDirectory(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
+            }
+            catch (Exception ex)
+
+            {
+                DebugMsg("Exception laucnhing openssl command terminal - " + ex.Message);
+                LogMsg("Exception trying to opening command terminal - " + ex.Message);
+            }
         }
 
         private void ImportJson()
@@ -765,7 +854,7 @@ namespace ExscudoTestnetGUI
                     }
                     catch (Exception ex)
                     {
-                        DebugMsg("Error deserializing json file - bad format?\r\n");
+                        DebugMsg("Error deserializing json file - bad format? : " + ex.Message);
                     }
 
                     UpdateConfigDisplay();
@@ -792,8 +881,16 @@ namespace ExscudoTestnetGUI
 
         private void ImportConfigjsonToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            try
+            {
 
-            ImportJson();
+                ImportJson();
+            }
+            catch(Exception ex)
+            {
+                DebugMsg("Error importing json, check it is valid - " + ex.Message);
+                LogMsg("Error importing json, check it is valid - " + ex.Message);
+            }
 
         }
 
@@ -817,11 +914,13 @@ namespace ExscudoTestnetGUI
                     string jsonData = JsonConvert.SerializeObject(conf);
                     File.WriteAllText(filename, jsonData);
                     DebugMsg("File export OK\r\n");
+                    LogMsg("File export OK\r\n");
                 }
             }
             catch(Exception ex)
             {
                 DebugMsg("Error exporting config file  : " + ex.Message + "\r\n");
+                LogMsg("Error exporting config file  : " + ex.Message);
             }
         
 
@@ -831,21 +930,22 @@ namespace ExscudoTestnetGUI
         //open the working folder in explorer
         private void OpenWorkingFolderToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            //launch eon command line
-            Process.Start("explorer.exe", Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));            
+            try
+            {
+                //launch eon command line
+                Process.Start("explorer.exe", Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
+            }
+            catch (Exception ex)
+            {
+                DebugMsg("Error opening working folder  : " + ex.Message + "\r\n");
+                LogMsg("Error opening working folder  : " + ex.Message + "\r\n");
+            }
         }
 
-        private void Label16_Click(object sender, EventArgs e)
+        private void RefillBTN_Click(object sender, EventArgs e)
         {
-
-        }
-
-        private void refillBTN_Click(object sender, EventArgs e)
-        {
-            //int amount = Convert.ToInt16(balDepAmountTB.Text);
             DialogResult res;
 
-            //MessageBox.Show();
             using (DialogCenteringService centeringService = new DialogCenteringService(this)) // center message box
             {
                 res = MessageBox.Show("Transfer " + balDepAmountTB.Text + " to deposit?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
@@ -856,25 +956,41 @@ namespace ExscudoTestnetGUI
                 //code for Yes
                 string refillResp = EonCMD("eon refill " + balDepAmountTB.Text);
 
-                //strip the generic stuff
-                refillResp = refillResp.Substring(refillResp.IndexOf("Deposit refill,"), refillResp.IndexOf("end...") - refillResp.IndexOf("Deposit refill,"));
-
-                //get the reported amount
-                int ind1 = refillResp.IndexOf("Amount:") + 7;
-                int ind2 = refillResp.IndexOf("\r\n", ind1);
-
-                int rAmount = Convert.ToInt16(refillResp.Substring(ind1,ind2-ind1));
-
-                //get the result
-                int ind3 = refillResp.IndexOf("\"")+1;
-                int ind4 = refillResp.LastIndexOf("\"");
-                string resultS = refillResp.Substring(ind3, ind4 - ind3);
-                //MessageBox.Show();
-                using (DialogCenteringService centeringService = new DialogCenteringService(this)) // center message box
+                if (refillResp != "-1")
                 {
-                    MessageBox.Show("Refill " + rAmount + " : " + resultS);
-                    DebugClear();
-                    DebugMsg(refillResp + "\r\n");
+                    try
+                    {
+                        //strip the generic stuff
+                        refillResp = refillResp.Substring(refillResp.IndexOf("Deposit refill,"), refillResp.IndexOf("end...") - refillResp.IndexOf("Deposit refill,"));
+
+                        //get the reported amount
+                        int ind1 = refillResp.IndexOf("Amount:") + 7;
+                        int ind2 = refillResp.IndexOf("\r\n", ind1);
+
+                        int rAmount = Convert.ToInt16(refillResp.Substring(ind1, ind2 - ind1));
+
+                        //get the result
+                        int ind3 = refillResp.IndexOf("\"") + 1;
+                        int ind4 = refillResp.LastIndexOf("\"");
+                        string resultS = refillResp.Substring(ind3, ind4 - ind3);
+                        //MessageBox.Show();
+                        using (DialogCenteringService centeringService = new DialogCenteringService(this)) // center message box
+                        {
+                            MessageBox.Show("Refill " + rAmount + " : " + resultS);
+                            DebugClear();
+                            DebugMsg(refillResp + "\r\n");
+                        }
+                    }
+                    catch(Exception ex)
+                    {
+                        DebugMsg("Exception parsing refill response" + ex.Message + "\r\n");
+                        LogMsg("Exception parsing refill response" + ex.Message + "\r\n");
+                    }
+                }
+                else
+                {
+                    DebugMsg("Refill failed : " + refillResp + "\r\n");
+                    LogMsg("Refill failed  : " + refillResp + "\r\n");
                 }
 
             }
@@ -886,13 +1002,12 @@ namespace ExscudoTestnetGUI
             
         }
 
-        private void withdrawBTN_Click(object sender, EventArgs e)
+        private void WithdrawBTN_Click(object sender, EventArgs e)
         {
 
             
             DialogResult res;
 
-            //MessageBox.Show();
             using (DialogCenteringService centeringService = new DialogCenteringService(this)) // center message box
             {
                 res = MessageBox.Show("Withdraw " + balDepAmountTB.Text + " from deposit?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
@@ -903,25 +1018,42 @@ namespace ExscudoTestnetGUI
                 //code for Yes
                 string wdResp = EonCMD("eon withdraw " + balDepAmountTB.Text);
 
-                //strip the generic stuff
-                wdResp = wdResp.Substring(wdResp.IndexOf("Deposit"), wdResp.IndexOf("end...") - wdResp.IndexOf("Deposit"));
-
-                //get the reported amount
-                int ind1 = wdResp.IndexOf("Amount:") + 7;
-                int ind2 = wdResp.IndexOf("\r\n", ind1);
-                
-                //get the result
-                int ind3 = wdResp.IndexOf("\"") + 1;
-                int ind4 = wdResp.LastIndexOf("\"");
-                string resultS = wdResp.Substring(ind3, ind4 - ind3);
-                //MessageBox.Show();
-                using (DialogCenteringService centeringService = new DialogCenteringService(this)) // center message box
+                if (wdResp != "-1")
                 {
-                    MessageBox.Show("Withdraw " + balDepAmountTB.Text + " : " + resultS);
+                    try
+                    {
+                        //strip the generic stuff
+                        wdResp = wdResp.Substring(wdResp.IndexOf("Deposit"), wdResp.IndexOf("end...") - wdResp.IndexOf("Deposit"));
 
-                    DebugClear();
-                    DebugMsg(wdResp + "\r\n");
+                        //get the reported amount
+                        int ind1 = wdResp.IndexOf("Amount:") + 7;
+                        int ind2 = wdResp.IndexOf("\r\n", ind1);
+
+                        //get the result
+                        int ind3 = wdResp.IndexOf("\"") + 1;
+                        int ind4 = wdResp.LastIndexOf("\"");
+                        string resultS = wdResp.Substring(ind3, ind4 - ind3);
+                        //MessageBox.Show();
+                        using (DialogCenteringService centeringService = new DialogCenteringService(this)) // center message box
+                        {
+                            MessageBox.Show("Withdraw " + balDepAmountTB.Text + " : " + resultS);
+
+                            DebugClear();
+                            DebugMsg(wdResp + "\r\n");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        DebugMsg("Exception parsing withdraw response" + ex.Message + "\r\n");
+                        LogMsg("Exception parsing withdraw response" + ex.Message + "\r\n");
+                    }
                 }
+                else
+                {
+                    DebugMsg("Withdraw failed : " + wdResp + "\r\n");
+                    LogMsg("Withdraw failed  : " + wdResp + "\r\n");
+                }
+            
 
             }
             else if (res == DialogResult.No)
@@ -932,7 +1064,7 @@ namespace ExscudoTestnetGUI
 
         }
 
-        private void txSendBTN_Click(object sender, EventArgs e)
+        private void TxSendBTN_Click(object sender, EventArgs e)
         {
             
             string recipientAddress = txRecipientTB.Text;
@@ -949,33 +1081,49 @@ namespace ExscudoTestnetGUI
                 //code for Yes
                 string txResp = EonCMD("eon payment " + recipientAddress + " " + balDepAmountTB.Text);
 
-                //strip the generic stuff
-                txResp = txResp.Substring(txResp.IndexOf("Ordinary"), txResp.IndexOf("end...") - txResp.IndexOf("Ordinary"));
-
-                //get the reported amount
-                int ind1 = txResp.IndexOf("Amount:") + 7;
-                int ind2 = txResp.IndexOf("\r\n", ind1);
-
-                string rAmount = txResp.Substring(ind1, ind2 - ind1);
-
-                //get the recipient account
-                int ind5 = txResp.IndexOf("account:") + 8;
-                int ind6 = txResp.IndexOf("\r\n", ind5);
-
-                string rAccount = txResp.Substring(ind5, ind6 - ind5);
-
-
-                //get the result
-                int ind3 = txResp.IndexOf("\"") + 1;
-                int ind4 = txResp.LastIndexOf("\"");
-                string resultS = txResp.Substring(ind3, ind4 - ind3);
-                //MessageBox.Show();
-                using (DialogCenteringService centeringService = new DialogCenteringService(this)) // center message box
+                if (txResp != "-1")
                 {
-                    MessageBox.Show("Sent " + rAmount + " to " + rAccount + " : " + resultS);
+                    try
+                    {
+                        //strip the generic stuff
+                        txResp = txResp.Substring(txResp.IndexOf("Ordinary"), txResp.IndexOf("end...") - txResp.IndexOf("Ordinary"));
 
-                    DebugClear();
-                    DebugMsg(txResp + "\r\n");
+                        //get the reported amount
+                        int ind1 = txResp.IndexOf("Amount:") + 7;
+                        int ind2 = txResp.IndexOf("\r\n", ind1);
+
+                        string rAmount = txResp.Substring(ind1, ind2 - ind1);
+
+                        //get the recipient account
+                        int ind5 = txResp.IndexOf("account:") + 8;
+                        int ind6 = txResp.IndexOf("\r\n", ind5);
+
+                        string rAccount = txResp.Substring(ind5, ind6 - ind5);
+
+
+                        //get the result
+                        int ind3 = txResp.IndexOf("\"") + 1;
+                        int ind4 = txResp.LastIndexOf("\"");
+                        string resultS = txResp.Substring(ind3, ind4 - ind3);
+                        //MessageBox.Show();
+                        using (DialogCenteringService centeringService = new DialogCenteringService(this)) // center message box
+                        {
+                            MessageBox.Show("Sent " + rAmount + " to " + rAccount + " : " + resultS);
+
+                            DebugClear();
+                            DebugMsg(txResp + "\r\n");
+                        }
+                    }
+                    catch(Exception ex)
+                    {
+                        DebugMsg("Exception parsing send response" + ex.Message + "\r\n");
+                        LogMsg("Exception parsing send response" + ex.Message + "\r\n");
+                    }
+                }
+                else
+                {
+                    DebugMsg("Send failed : " + txResp + "\r\n");
+                    LogMsg("Send failed  : " + txResp + "\r\n");
                 }
 
             }
@@ -986,12 +1134,12 @@ namespace ExscudoTestnetGUI
             }
         }
 
-        private void openExscudoRegistationWebsiteToolStripMenuItem_Click(object sender, EventArgs e)
+        private void OpenExscudoRegistationWebsiteToolStripMenuItem_Click(object sender, EventArgs e)
         {
             System.Diagnostics.Process.Start("https://testnet.eontechnology.org/");
         }
 
-        private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
+        private void AboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
             //MessageBox.Show();
             using (DialogCenteringService centeringService = new DialogCenteringService(this)) // center message box
@@ -1000,31 +1148,20 @@ namespace ExscudoTestnetGUI
             }
         }
 
-        private void quitToolStripMenuItem_Click(object sender, EventArgs e)
+        private void QuitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             eonThreadRun = false;
             Application.Exit();
         }
+
+        private void UncommitBTN_Click(object sender, EventArgs e)
+        {
+            string commitResponse = EonCMD("eon uncommit " + accountTB.Text);
+            if (commitResponse != "-1") UpdateCommited(commitResponse);
+        }
+
+
     }
 
-    public class Payouts
-    {
-        public bool Enabled { get; set; }
-        public string Interval { get; set; }
-        public string Peer { get; set; }
-        public string Seed { get; set; }
-        public uint Deadline { get; set; }
-        public uint Fee { get; set; }
-        public string Timeout { get; set; }
-        public int Threshold { get; set; }
-    }
 
-    public class RootObject
-    {
-        public byte Threads { get; set; }
-        public string Coin { get; set; }
-        public string Name { get; set; }
-        public string UpstreamCheckInterval { get; set; }
-        public Payouts Payouts { get; set; }
-    }
 }
