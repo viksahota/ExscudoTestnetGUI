@@ -73,7 +73,6 @@ namespace ExscudoTestnetGUI
             //get the account balance and update display
             UpdateBalance(EonCMD("eon state"));
 
-
             while (eonThreadRun)
             {
                 Thread.Sleep(5000);
@@ -94,33 +93,44 @@ namespace ExscudoTestnetGUI
             else
             {
                 //locate the braces containing json response
-                string jsonResponse = stateResponse.Substring(stateResponse.IndexOf('{'), (stateResponse.LastIndexOf('}') - stateResponse.IndexOf('{') + 1));
+                int ind1 = stateResponse.IndexOf('{');
+                int ind2 = (stateResponse.LastIndexOf('}'));
 
-                //deserialise the response
-                responseClass oResp = new responseClass();
-                oResp = JsonConvert.DeserializeObject<responseClass>(jsonResponse);
-
-                //report values if OK
-                if (oResp.State.Code == 200)
+                if (ind1!=-1 && ind2!=-1)
                 {
-                    balanceLBL.Text = oResp.Amount.ToString();
-                    depositLBL.Text = oResp.Deposit.ToString();
+                    string jsonResponse = stateResponse.Substring(ind1, ind2 - ind1 +1);
 
-                }
-                else if (oResp.State.Code == 404)
-                {
-                    balanceLBL.Text = "404: Account not found";
-                    depositLBL.Text = "404: Account not found";
+                    //deserialise the response
+                    responseClass oResp = new responseClass();
+                    oResp = JsonConvert.DeserializeObject<responseClass>(jsonResponse);
 
-                    //display message for user to register this info with exscudo....
-                    if (!registerWarning)
+                    //report values if OK
+                    if (oResp.State.Code == 200)
                     {
-                        DebugMsg("~~~  Your account cannot be found. To register it with Exscudo you will need these details : ~~~\r\nYour email\r\nYour account ID : " + accountTB.Text + "\r\nYour public key : " + pubkeyTB.Text + "\r\n" + @"Register at :  https://testnet.eontechnology.org/" + "\r\n");
-                        DebugMsg("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n");
-                        registerWarning = true;
-                    }
+                        balanceLBL.Text = oResp.Amount.ToString();
+                        depositLBL.Text = oResp.Deposit.ToString();
 
-                 }
+                    }
+                    else if (oResp.State.Code == 404)
+                    {
+                        balanceLBL.Text = "404: Account not found";
+                        depositLBL.Text = "404: Account not found";
+
+                        //display message for user to register this info with exscudo....
+                        if (!registerWarning)
+                        {
+                            DebugMsg("~~~  Your account cannot be found. To register it with Exscudo you will need these details : ~~~\r\nYour email\r\nYour account ID : " + accountTB.Text + "\r\nYour public key : " + pubkeyTB.Text + "\r\n" + @"Register at :  https://testnet.eontechnology.org/" + "\r\n");
+                            DebugMsg("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n");
+                            registerWarning = true;
+                        }
+
+                    }
+                }
+                else
+                {
+                    DebugMsg("Error checking balance : " + stateResponse);
+                }
+
             }
 
             return;
