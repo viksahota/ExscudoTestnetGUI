@@ -1079,7 +1079,7 @@ namespace ExscudoTestnetGUI
             if (res == DialogResult.Yes)
             {
                 //code for Yes
-                string txResp = EonCMD("eon payment " + recipientAddress + " " + balDepAmountTB.Text);
+                string txResp = EonCMD("eon payment " + recipientAddress + " " + txAmountTB.Text);
 
                 if (txResp != "-1")
                 {
