@@ -35,25 +35,31 @@
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.walletTab = new System.Windows.Forms.TabPage();
-            this.groupBox8 = new System.Windows.Forms.GroupBox();
-            this.label16 = new System.Windows.Forms.Label();
-            this.depositLBL = new System.Windows.Forms.Label();
-            this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.balDepAmountTB = new System.Windows.Forms.TextBox();
+            this.groupBox12 = new System.Windows.Forms.GroupBox();
+            this.objectListView1 = new BrightIdeasSoftware.ObjectListView();
+            this.olvColumn1 = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.olvColumn2 = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.groupBox11 = new System.Windows.Forms.GroupBox();
             this.groupBox7 = new System.Windows.Forms.GroupBox();
             this.rxAddressLBL = new System.Windows.Forms.Label();
             this.label20 = new System.Windows.Forms.Label();
-            this.refillBTN = new System.Windows.Forms.Button();
-            this.withdrawBTN = new System.Windows.Forms.Button();
             this.groupBox6 = new System.Windows.Forms.GroupBox();
             this.label19 = new System.Windows.Forms.Label();
             this.txAmountTB = new System.Windows.Forms.TextBox();
             this.label18 = new System.Windows.Forms.Label();
             this.txRecipientTB = new System.Windows.Forms.TextBox();
             this.txSendBTN = new System.Windows.Forms.Button();
+            this.groupBox10 = new System.Windows.Forms.GroupBox();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
             this.label15 = new System.Windows.Forms.Label();
             this.balanceLBL = new System.Windows.Forms.Label();
+            this.groupBox8 = new System.Windows.Forms.GroupBox();
+            this.label16 = new System.Windows.Forms.Label();
+            this.depositLBL = new System.Windows.Forms.Label();
+            this.withdrawBTN = new System.Windows.Forms.Button();
+            this.balDepAmountTB = new System.Windows.Forms.TextBox();
+            this.refillBTN = new System.Windows.Forms.Button();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.configTab = new System.Windows.Forms.TabPage();
             this.groupBox9 = new System.Windows.Forms.GroupBox();
             this.logScrollCB = new System.Windows.Forms.CheckBox();
@@ -84,6 +90,7 @@
             this.rootThreadsNM = new System.Windows.Forms.NumericUpDown();
             this.label1 = new System.Windows.Forms.Label();
             this.tranactionsTab = new System.Windows.Forms.TabPage();
+            this.uncommitBTN = new System.Windows.Forms.Button();
             this.transactionLV = new BrightIdeasSoftware.ObjectListView();
             this.typeColumn = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.timestampColumn = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
@@ -112,15 +119,19 @@
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panel1 = new System.Windows.Forms.Panel();
-            this.uncommitBTN = new System.Windows.Forms.Button();
+            this.olvColumn3 = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.groupBox1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.walletTab.SuspendLayout();
-            this.groupBox8.SuspendLayout();
-            this.groupBox2.SuspendLayout();
+            this.groupBox12.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.objectListView1)).BeginInit();
+            this.groupBox11.SuspendLayout();
             this.groupBox7.SuspendLayout();
             this.groupBox6.SuspendLayout();
+            this.groupBox10.SuspendLayout();
             this.groupBox5.SuspendLayout();
+            this.groupBox8.SuspendLayout();
+            this.groupBox2.SuspendLayout();
             this.configTab.SuspendLayout();
             this.groupBox9.SuspendLayout();
             this.groupBox4.SuspendLayout();
@@ -141,11 +152,11 @@
             // 
             // debugTB
             // 
-            this.debugTB.Location = new System.Drawing.Point(18, 41);
+            this.debugTB.Location = new System.Drawing.Point(21, 25);
             this.debugTB.Multiline = true;
             this.debugTB.Name = "debugTB";
             this.debugTB.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.debugTB.Size = new System.Drawing.Size(1460, 629);
+            this.debugTB.Size = new System.Drawing.Size(1450, 541);
             this.debugTB.TabIndex = 0;
             // 
             // commitBTN
@@ -202,14 +213,10 @@
             // 
             // walletTab
             // 
-            this.walletTab.Controls.Add(this.groupBox8);
+            this.walletTab.Controls.Add(this.groupBox12);
+            this.walletTab.Controls.Add(this.groupBox11);
+            this.walletTab.Controls.Add(this.groupBox10);
             this.walletTab.Controls.Add(this.groupBox2);
-            this.walletTab.Controls.Add(this.balDepAmountTB);
-            this.walletTab.Controls.Add(this.groupBox7);
-            this.walletTab.Controls.Add(this.refillBTN);
-            this.walletTab.Controls.Add(this.withdrawBTN);
-            this.walletTab.Controls.Add(this.groupBox6);
-            this.walletTab.Controls.Add(this.groupBox5);
             this.walletTab.Location = new System.Drawing.Point(4, 29);
             this.walletTab.Name = "walletTab";
             this.walletTab.Padding = new System.Windows.Forms.Padding(3);
@@ -218,74 +225,70 @@
             this.walletTab.Text = "Wallet";
             this.walletTab.UseVisualStyleBackColor = true;
             // 
-            // groupBox8
+            // groupBox12
             // 
-            this.groupBox8.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(224)))), ((int)(((byte)(192)))));
-            this.groupBox8.Controls.Add(this.label16);
-            this.groupBox8.Controls.Add(this.depositLBL);
-            this.groupBox8.Location = new System.Drawing.Point(896, 15);
-            this.groupBox8.Name = "groupBox8";
-            this.groupBox8.Size = new System.Drawing.Size(421, 148);
-            this.groupBox8.TabIndex = 3;
-            this.groupBox8.TabStop = false;
-            this.groupBox8.Text = "Deposit (staked)";
+            this.groupBox12.Controls.Add(this.objectListView1);
+            this.groupBox12.Location = new System.Drawing.Point(18, 18);
+            this.groupBox12.Name = "groupBox12";
+            this.groupBox12.Size = new System.Drawing.Size(557, 420);
+            this.groupBox12.TabIndex = 15;
+            this.groupBox12.TabStop = false;
+            this.groupBox12.Text = "Accounts";
             // 
-            // label16
+            // objectListView1
             // 
-            this.label16.AutoSize = true;
-            this.label16.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label16.Location = new System.Drawing.Point(135, 23);
-            this.label16.Name = "label16";
-            this.label16.Size = new System.Drawing.Size(125, 37);
-            this.label16.TabIndex = 3;
-            this.label16.Text = "Deposit";
+            this.objectListView1.AllColumns.Add(this.olvColumn1);
+            this.objectListView1.AllColumns.Add(this.olvColumn2);
+            this.objectListView1.AllColumns.Add(this.olvColumn3);
+            this.objectListView1.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.olvColumn1,
+            this.olvColumn2,
+            this.olvColumn3});
+            this.objectListView1.Location = new System.Drawing.Point(21, 34);
+            this.objectListView1.Name = "objectListView1";
+            this.objectListView1.Size = new System.Drawing.Size(515, 365);
+            this.objectListView1.TabIndex = 0;
+            this.objectListView1.UseCompatibleStateImageBehavior = false;
+            this.objectListView1.View = System.Windows.Forms.View.Details;
             // 
-            // depositLBL
+            // olvColumn1
             // 
-            this.depositLBL.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.depositLBL.Location = new System.Drawing.Point(2, 74);
-            this.depositLBL.Name = "depositLBL";
-            this.depositLBL.Size = new System.Drawing.Size(419, 37);
-            this.depositLBL.TabIndex = 2;
-            this.depositLBL.Text = "-";
-            this.depositLBL.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.olvColumn1.Text = "Name";
+            this.olvColumn1.Width = 66;
             // 
-            // groupBox2
+            // olvColumn2
             // 
-            this.groupBox2.Controls.Add(this.debugTB);
-            this.groupBox2.Location = new System.Drawing.Point(18, 339);
-            this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(1493, 691);
-            this.groupBox2.TabIndex = 12;
-            this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "Debug View";
+            this.olvColumn2.Text = "Account ID";
+            this.olvColumn2.Width = 118;
             // 
-            // balDepAmountTB
+            // groupBox11
             // 
-            this.balDepAmountTB.Location = new System.Drawing.Point(598, 72);
-            this.balDepAmountTB.Name = "balDepAmountTB";
-            this.balDepAmountTB.Size = new System.Drawing.Size(278, 26);
-            this.balDepAmountTB.TabIndex = 3;
-            this.balDepAmountTB.Text = "0";
-            this.balDepAmountTB.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.groupBox11.Controls.Add(this.groupBox7);
+            this.groupBox11.Controls.Add(this.groupBox6);
+            this.groupBox11.Location = new System.Drawing.Point(581, 228);
+            this.groupBox11.Name = "groupBox11";
+            this.groupBox11.Size = new System.Drawing.Size(924, 210);
+            this.groupBox11.TabIndex = 14;
+            this.groupBox11.TabStop = false;
+            this.groupBox11.Text = "Send and Receive";
             // 
             // groupBox7
             // 
             this.groupBox7.Controls.Add(this.rxAddressLBL);
             this.groupBox7.Controls.Add(this.label20);
-            this.groupBox7.Location = new System.Drawing.Point(747, 180);
+            this.groupBox7.Location = new System.Drawing.Point(459, 36);
             this.groupBox7.Name = "groupBox7";
-            this.groupBox7.Size = new System.Drawing.Size(570, 153);
+            this.groupBox7.Size = new System.Drawing.Size(443, 153);
             this.groupBox7.TabIndex = 5;
             this.groupBox7.TabStop = false;
             this.groupBox7.Text = "Receive";
             // 
             // rxAddressLBL
             // 
-            this.rxAddressLBL.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.rxAddressLBL.Location = new System.Drawing.Point(25, 67);
+            this.rxAddressLBL.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.rxAddressLBL.Location = new System.Drawing.Point(22, 67);
             this.rxAddressLBL.Name = "rxAddressLBL";
-            this.rxAddressLBL.Size = new System.Drawing.Size(580, 37);
+            this.rxAddressLBL.Size = new System.Drawing.Size(399, 37);
             this.rxAddressLBL.TabIndex = 6;
             this.rxAddressLBL.Text = "-";
             this.rxAddressLBL.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -293,31 +296,11 @@
             // label20
             // 
             this.label20.AutoSize = true;
-            this.label20.Location = new System.Drawing.Point(238, 37);
+            this.label20.Location = new System.Drawing.Point(159, 37);
             this.label20.Name = "label20";
             this.label20.Size = new System.Drawing.Size(137, 20);
             this.label20.TabIndex = 25;
             this.label20.Text = "Receive Address :";
-            // 
-            // refillBTN
-            // 
-            this.refillBTN.Location = new System.Drawing.Point(687, 26);
-            this.refillBTN.Name = "refillBTN";
-            this.refillBTN.Size = new System.Drawing.Size(110, 35);
-            this.refillBTN.TabIndex = 5;
-            this.refillBTN.Text = "> Refill >";
-            this.refillBTN.UseVisualStyleBackColor = true;
-            this.refillBTN.Click += new System.EventHandler(this.RefillBTN_Click);
-            // 
-            // withdrawBTN
-            // 
-            this.withdrawBTN.Location = new System.Drawing.Point(687, 110);
-            this.withdrawBTN.Name = "withdrawBTN";
-            this.withdrawBTN.Size = new System.Drawing.Size(110, 37);
-            this.withdrawBTN.TabIndex = 4;
-            this.withdrawBTN.Text = "< Withdraw <";
-            this.withdrawBTN.UseVisualStyleBackColor = true;
-            this.withdrawBTN.Click += new System.EventHandler(this.WithdrawBTN_Click);
             // 
             // groupBox6
             // 
@@ -326,9 +309,9 @@
             this.groupBox6.Controls.Add(this.label18);
             this.groupBox6.Controls.Add(this.txRecipientTB);
             this.groupBox6.Controls.Add(this.txSendBTN);
-            this.groupBox6.Location = new System.Drawing.Point(158, 180);
+            this.groupBox6.Location = new System.Drawing.Point(16, 36);
             this.groupBox6.Name = "groupBox6";
-            this.groupBox6.Size = new System.Drawing.Size(563, 153);
+            this.groupBox6.Size = new System.Drawing.Size(421, 153);
             this.groupBox6.TabIndex = 4;
             this.groupBox6.TabStop = false;
             this.groupBox6.Text = "Send";
@@ -336,7 +319,7 @@
             // label19
             // 
             this.label19.AutoSize = true;
-            this.label19.Location = new System.Drawing.Point(130, 71);
+            this.label19.Location = new System.Drawing.Point(33, 71);
             this.label19.Name = "label19";
             this.label19.Size = new System.Drawing.Size(73, 20);
             this.label19.TabIndex = 24;
@@ -344,15 +327,17 @@
             // 
             // txAmountTB
             // 
-            this.txAmountTB.Location = new System.Drawing.Point(209, 68);
+            this.txAmountTB.Location = new System.Drawing.Point(111, 68);
             this.txAmountTB.Name = "txAmountTB";
-            this.txAmountTB.Size = new System.Drawing.Size(313, 26);
+            this.txAmountTB.Size = new System.Drawing.Size(276, 26);
             this.txAmountTB.TabIndex = 23;
+            this.txAmountTB.Text = "0";
+            this.txAmountTB.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // label18
             // 
             this.label18.AutoSize = true;
-            this.label18.Location = new System.Drawing.Point(49, 30);
+            this.label18.Location = new System.Drawing.Point(22, 30);
             this.label18.Name = "label18";
             this.label18.Size = new System.Drawing.Size(84, 20);
             this.label18.TabIndex = 22;
@@ -360,14 +345,15 @@
             // 
             // txRecipientTB
             // 
-            this.txRecipientTB.Location = new System.Drawing.Point(139, 27);
+            this.txRecipientTB.Location = new System.Drawing.Point(111, 27);
             this.txRecipientTB.Name = "txRecipientTB";
-            this.txRecipientTB.Size = new System.Drawing.Size(383, 26);
+            this.txRecipientTB.Size = new System.Drawing.Size(276, 26);
             this.txRecipientTB.TabIndex = 6;
+            this.txRecipientTB.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // txSendBTN
             // 
-            this.txSendBTN.Location = new System.Drawing.Point(415, 104);
+            this.txSendBTN.Location = new System.Drawing.Point(280, 104);
             this.txSendBTN.Name = "txSendBTN";
             this.txSendBTN.Size = new System.Drawing.Size(107, 33);
             this.txSendBTN.TabIndex = 3;
@@ -375,14 +361,28 @@
             this.txSendBTN.UseVisualStyleBackColor = true;
             this.txSendBTN.Click += new System.EventHandler(this.TxSendBTN_Click);
             // 
+            // groupBox10
+            // 
+            this.groupBox10.Controls.Add(this.groupBox5);
+            this.groupBox10.Controls.Add(this.groupBox8);
+            this.groupBox10.Controls.Add(this.withdrawBTN);
+            this.groupBox10.Controls.Add(this.balDepAmountTB);
+            this.groupBox10.Controls.Add(this.refillBTN);
+            this.groupBox10.Location = new System.Drawing.Point(581, 18);
+            this.groupBox10.Name = "groupBox10";
+            this.groupBox10.Size = new System.Drawing.Size(924, 204);
+            this.groupBox10.TabIndex = 13;
+            this.groupBox10.TabStop = false;
+            this.groupBox10.Text = "Wallet Balance and Deposit";
+            // 
             // groupBox5
             // 
             this.groupBox5.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
             this.groupBox5.Controls.Add(this.label15);
             this.groupBox5.Controls.Add(this.balanceLBL);
-            this.groupBox5.Location = new System.Drawing.Point(158, 15);
+            this.groupBox5.Location = new System.Drawing.Point(16, 34);
             this.groupBox5.Name = "groupBox5";
-            this.groupBox5.Size = new System.Drawing.Size(421, 148);
+            this.groupBox5.Size = new System.Drawing.Size(325, 148);
             this.groupBox5.TabIndex = 2;
             this.groupBox5.TabStop = false;
             this.groupBox5.Text = "Balance";
@@ -391,7 +391,7 @@
             // 
             this.label15.AutoSize = true;
             this.label15.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label15.Location = new System.Drawing.Point(139, 23);
+            this.label15.Location = new System.Drawing.Point(98, 30);
             this.label15.Name = "label15";
             this.label15.Size = new System.Drawing.Size(132, 37);
             this.label15.TabIndex = 1;
@@ -399,13 +399,84 @@
             // 
             // balanceLBL
             // 
-            this.balanceLBL.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.balanceLBL.Location = new System.Drawing.Point(0, 74);
+            this.balanceLBL.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.balanceLBL.Location = new System.Drawing.Point(18, 74);
             this.balanceLBL.Name = "balanceLBL";
-            this.balanceLBL.Size = new System.Drawing.Size(416, 37);
+            this.balanceLBL.Size = new System.Drawing.Size(290, 37);
             this.balanceLBL.TabIndex = 0;
             this.balanceLBL.Text = "-";
             this.balanceLBL.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // groupBox8
+            // 
+            this.groupBox8.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(224)))), ((int)(((byte)(192)))));
+            this.groupBox8.Controls.Add(this.label16);
+            this.groupBox8.Controls.Add(this.depositLBL);
+            this.groupBox8.Location = new System.Drawing.Point(583, 34);
+            this.groupBox8.Name = "groupBox8";
+            this.groupBox8.Size = new System.Drawing.Size(325, 148);
+            this.groupBox8.TabIndex = 3;
+            this.groupBox8.TabStop = false;
+            this.groupBox8.Text = "Deposit (staked)";
+            // 
+            // label16
+            // 
+            this.label16.AutoSize = true;
+            this.label16.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label16.Location = new System.Drawing.Point(92, 30);
+            this.label16.Name = "label16";
+            this.label16.Size = new System.Drawing.Size(125, 37);
+            this.label16.TabIndex = 3;
+            this.label16.Text = "Deposit";
+            // 
+            // depositLBL
+            // 
+            this.depositLBL.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.depositLBL.Location = new System.Drawing.Point(18, 74);
+            this.depositLBL.Name = "depositLBL";
+            this.depositLBL.Size = new System.Drawing.Size(279, 37);
+            this.depositLBL.TabIndex = 2;
+            this.depositLBL.Text = "-";
+            this.depositLBL.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // withdrawBTN
+            // 
+            this.withdrawBTN.Location = new System.Drawing.Point(402, 129);
+            this.withdrawBTN.Name = "withdrawBTN";
+            this.withdrawBTN.Size = new System.Drawing.Size(124, 37);
+            this.withdrawBTN.TabIndex = 4;
+            this.withdrawBTN.Text = "< Withdraw <";
+            this.withdrawBTN.UseVisualStyleBackColor = true;
+            this.withdrawBTN.Click += new System.EventHandler(this.WithdrawBTN_Click);
+            // 
+            // balDepAmountTB
+            // 
+            this.balDepAmountTB.Location = new System.Drawing.Point(370, 91);
+            this.balDepAmountTB.Name = "balDepAmountTB";
+            this.balDepAmountTB.Size = new System.Drawing.Size(185, 26);
+            this.balDepAmountTB.TabIndex = 3;
+            this.balDepAmountTB.Text = "0";
+            this.balDepAmountTB.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // refillBTN
+            // 
+            this.refillBTN.Location = new System.Drawing.Point(402, 45);
+            this.refillBTN.Name = "refillBTN";
+            this.refillBTN.Size = new System.Drawing.Size(124, 35);
+            this.refillBTN.TabIndex = 5;
+            this.refillBTN.Text = "> Refill >";
+            this.refillBTN.UseVisualStyleBackColor = true;
+            this.refillBTN.Click += new System.EventHandler(this.RefillBTN_Click);
+            // 
+            // groupBox2
+            // 
+            this.groupBox2.Controls.Add(this.debugTB);
+            this.groupBox2.Location = new System.Drawing.Point(18, 444);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(1493, 586);
+            this.groupBox2.TabIndex = 12;
+            this.groupBox2.TabStop = false;
+            this.groupBox2.Text = "Debug View";
             // 
             // configTab
             // 
@@ -779,6 +850,16 @@
             this.tranactionsTab.Text = "Transactions";
             this.tranactionsTab.UseVisualStyleBackColor = true;
             // 
+            // uncommitBTN
+            // 
+            this.uncommitBTN.Location = new System.Drawing.Point(252, 29);
+            this.uncommitBTN.Name = "uncommitBTN";
+            this.uncommitBTN.Size = new System.Drawing.Size(216, 48);
+            this.uncommitBTN.TabIndex = 7;
+            this.uncommitBTN.Text = "Uncommited Transactions";
+            this.uncommitBTN.UseVisualStyleBackColor = true;
+            this.uncommitBTN.Click += new System.EventHandler(this.UncommitBTN_Click);
+            // 
             // transactionLV
             // 
             this.transactionLV.AllColumns.Add(this.typeColumn);
@@ -1021,15 +1102,10 @@
             this.panel1.Size = new System.Drawing.Size(1549, 50);
             this.panel1.TabIndex = 14;
             // 
-            // uncommitBTN
+            // olvColumn3
             // 
-            this.uncommitBTN.Location = new System.Drawing.Point(252, 29);
-            this.uncommitBTN.Name = "uncommitBTN";
-            this.uncommitBTN.Size = new System.Drawing.Size(216, 48);
-            this.uncommitBTN.TabIndex = 7;
-            this.uncommitBTN.Text = "Uncommited Transactions";
-            this.uncommitBTN.UseVisualStyleBackColor = true;
-            this.uncommitBTN.Click += new System.EventHandler(this.UncommitBTN_Click);
+            this.olvColumn3.Text = "Balance";
+            this.olvColumn3.Width = 90;
             // 
             // Form1
             // 
@@ -1051,17 +1127,21 @@
             this.groupBox1.PerformLayout();
             this.tabControl1.ResumeLayout(false);
             this.walletTab.ResumeLayout(false);
-            this.walletTab.PerformLayout();
-            this.groupBox8.ResumeLayout(false);
-            this.groupBox8.PerformLayout();
-            this.groupBox2.ResumeLayout(false);
-            this.groupBox2.PerformLayout();
+            this.groupBox12.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.objectListView1)).EndInit();
+            this.groupBox11.ResumeLayout(false);
             this.groupBox7.ResumeLayout(false);
             this.groupBox7.PerformLayout();
             this.groupBox6.ResumeLayout(false);
             this.groupBox6.PerformLayout();
+            this.groupBox10.ResumeLayout(false);
+            this.groupBox10.PerformLayout();
             this.groupBox5.ResumeLayout(false);
             this.groupBox5.PerformLayout();
+            this.groupBox8.ResumeLayout(false);
+            this.groupBox8.PerformLayout();
+            this.groupBox2.ResumeLayout(false);
+            this.groupBox2.PerformLayout();
             this.configTab.ResumeLayout(false);
             this.groupBox9.ResumeLayout(false);
             this.groupBox9.PerformLayout();
@@ -1176,6 +1256,13 @@
         private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem quitToolStripMenuItem;
         private System.Windows.Forms.Button uncommitBTN;
+        private System.Windows.Forms.GroupBox groupBox10;
+        private System.Windows.Forms.GroupBox groupBox11;
+        private System.Windows.Forms.GroupBox groupBox12;
+        private BrightIdeasSoftware.ObjectListView objectListView1;
+        private BrightIdeasSoftware.OLVColumn olvColumn1;
+        private BrightIdeasSoftware.OLVColumn olvColumn2;
+        private BrightIdeasSoftware.OLVColumn olvColumn3;
     }
 }
 

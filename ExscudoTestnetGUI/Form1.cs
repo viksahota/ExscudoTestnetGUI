@@ -7,6 +7,8 @@ using System.IO.Compression;
 using System.Reflection;
 using System.Threading;
 using System.Diagnostics;
+using System.Text.RegularExpressions;
+using System.Collections;
 
 
 namespace ExscudoTestnetGUI
@@ -15,8 +17,12 @@ namespace ExscudoTestnetGUI
     public partial class Form1 : Form
     {
 
-        //insantiate the config object
+        //insantiate the master-config object - this is the active config
         private configClass conf;
+
+        //create wallet list and the wallet object for the main account. Additional accounts can be added
+        ArrayList WalletList = new ArrayList();
+        WalletClass mainWallet = new WalletClass();
 
         // This delegates enable asynchronous calls to gui from other threads
         delegate void SetDebugCallback(string text);
@@ -24,10 +30,13 @@ namespace ExscudoTestnetGUI
         delegate void SetLogCallback(string text);
         delegate void SetInfTextCallback(string text);
         delegate void SetConfigUpdateCallback();
-        delegate void SetAccountInfoCallback(string text);
+        delegate void SetAccountInfoCallback(string infoResponse);
         delegate void SetBalanceUpdateCallback(string text);
+        delegate void SetBalanceUpdate2Callback(string text);
         delegate void SetUpdateCommitedCallback(string text);
         delegate void SetBackupRestoreCallback();
+        delegate void SetSyncGUIBalanceCallback(string balance, string deposit);
+
 
         //trips once per start to dispaly a message in debugTB if the account looks like its not registered with exscudo
         bool registerWarning = false;
@@ -36,6 +45,8 @@ namespace ExscudoTestnetGUI
         Thread eonThread;
         bool eonThreadRun = true;
 
+        string appPath = "";
+
         public Form1()
         {
             InitializeComponent();
@@ -43,10 +54,12 @@ namespace ExscudoTestnetGUI
             Application.ThreadException += new ThreadExceptionEventHandler(Application_ThreadException);
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
 
+            appPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\ExscudoTestnetGUI";
+
             //start the eon thread
             eonThread = new Thread(new ThreadStart(EonThreadStart));
             eonThread.Start();
-            
+
         }
 
         static void Application_ThreadException(object sender, ThreadExceptionEventArgs e)
@@ -57,47 +70,52 @@ namespace ExscudoTestnetGUI
 
         static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
-            
+
             // Log the exception, display it, etc
-            MessageBox.Show("Unhandled Exception error.\r\n\r\nPlease submit screenshot for debug : \r\n\r\n" + (e.ExceptionObject as Exception).Message , "Error - Terminating...." , MessageBoxButtons.OK , MessageBoxIcon.Exclamation);
-            
+            MessageBox.Show("Unhandled Exception error.\r\n\r\nPlease submit screenshot for debug : \r\n\r\n" + (e.ExceptionObject as Exception).Message, "Error - Terminating....", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+
         }
 
         public void EonThreadStart()
         {
             //allow the form to open
             Thread.Sleep(100);
-            DebugMsg("~~ Application start ~~\r\n");
+            DebugLogMsg("~~ Application start ~~\r\n");
 
             Thread.Sleep(100);
-            DebugMsg("Working directory : " + Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\r\n");
+            DebugLogMsg("Working directory : " + Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\r\n");
 
             //init sequence
             try
             {
                 CheckInstall();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                DebugMsg("Error during checkinstall :" + ex.Message + "\r\n");
-                LogMsg("Error during checkinstall :" + ex.Message + "\r\n");
+                DebugLogMsg("Error during checkinstall :" + ex.Message + "\r\n");
             }
 
             Thread.Sleep(100);
-            //execute eon and display the info 
+            //execute eon and display version information 
             string eontext = EonCMD("eon");
-            if (eontext!="-1") InfoUpdate(eontext);
+            if (eontext != "-1") InfoUpdate(eontext);
 
             //update config
             UpdateConfigDisplay();
 
             //get the account info and populate the GUI
             string inftext = EonCMD("eon info");
-            if (inftext!="-1") UpdateAccountInfo(inftext);
+            if (inftext != "-1") UpdateAccountInfo(inftext);
 
             //get the account balance and update display
             string stateResponse = EonCMD("eon state");
-            if (stateResponse!="-1") UpdateBalance(stateResponse);
+            if (stateResponse != "-1") UpdateBalance(stateResponse);
+
+            #region  get the list of created accounts
+
+            GetAttachedAccounts();
+
+            #endregion
 
             int counter = 0;
             DateTime lastBalancePollTime = DateTime.Now;
@@ -125,73 +143,133 @@ namespace ExscudoTestnetGUI
             }
         }
 
-        //updates the gui balance and deposit. provide the response of 'eon state' (allows eon cmd to be run in another thread this way, callback to forms to update)
+        //seeks out the accounts that have been created by the master account by scanning the commit history
+        private void GetAttachedAccounts()
+        {
+            //we need to get the commit response and search for type 100 transactions
+            string commitResponse = EonCMD("eon commit " + accountTB.Text);
+            if (commitResponse != "-1") UpdateCommited(commitResponse);
+
+            commitClass oResp = new commitClass();
+
+            try
+            {
+                //locate the braces containing json response
+                int ind1 = commitResponse.IndexOf('{');
+                int ind2 = commitResponse.LastIndexOf('}');
+
+                if ((ind1 != -1) && (ind2 != -1) && (!commitResponse.Contains("null")) && (commitResponse != "-1"))
+                {
+                    string jsonResponse = commitResponse.Substring(ind1, (ind2 - ind1 + 1));
+
+                    //deserialise the response
+                    oResp = JsonConvert.DeserializeObject<commitClass>(jsonResponse);
+
+                    for (int i = 0; i < oResp.All.Length; i++)
+                    {
+                        //check for new account creation
+                        if (oResp.All[i].Type == 100)
+                        {
+                            //get the transaction signature, we'll need it to manually pull the attachement data since we cant handle dynamic key in the attachment
+                            string targetSig = oResp.All[i].Signature;
+
+                            //get the index of this signature in the commit response
+                            int sigIndex = commitResponse.IndexOf(targetSig);
+
+                            //use regex to return the attached account ID and public key
+                            string pattern = @"""" + targetSig + @""",\s+""attachment"": {\s*""([^""]*)"":\s+""([^""]*)""\s*}";
+                            Match transactionMatch = Regex.Match(commitResponse, pattern);
+
+                            DebugMsg("Attached account detected: " + transactionMatch.Groups[1] + " ( public-key: " + transactionMatch.Groups[2] + ")\r\n");
+
+                        }
+                    }
+
+
+                    //this.transactionLV.SetObjects(oResp.All);
+                }
+                else
+                {
+                    DebugMsg("Error checking tranactions, unexpected  commit response : " + commitResponse);
+                }
+            }
+            catch (Exception ex)
+            {
+                DebugMsg("Exception in UpdateCommited() - " + ex.Message);
+                LogMsg("Exception in UpdateCommited() - " + ex.Message);
+            }
+        }
+
+        //updates the gui balance and deposit. provide the response of 'eon state' (allows eon cmd to be run in another thread this way, callback to forms to update).
         private void UpdateBalance(string stateResponse)
+        {
+            try
+            {
+                Match stateMatches = Regex.Match(stateResponse, @"{\s*""state"": {\s*""(.*)"":.(.*),\s*""(.*)"":.""(.*)""\s*},\s*""(.*)"":.(\d*),\s*""(.*)"":.(\d*)\s*}");
+
+                //if we have a valid match , extract the items into a stateResponse object
+                if (stateMatches.Groups.Count == 9)
+                {
+                    //recover the parameters
+                    int code = Convert.ToInt16(stateMatches.Groups[2].ToString());
+
+                    //if OK, update the GUI balance
+                    if (code == 200)
+                    {
+                        //update balance and deposit
+                        SyncGUIBalance(stateMatches.Groups[6].ToString(), stateMatches.Groups[8].ToString());
+                    }
+                    else if (code == 404)
+                    {
+                        SyncGUIBalance("404: Account not found", "404: Account not found");
+
+                        //display message for user to register this info with exscudo....
+                        if (!registerWarning)
+                        {
+                            DebugMsg("~~~  Your account cannot be found. To register it with Exscudo you will need these details : ~~~\r\nYour email\r\nYour account ID : " + accountTB.Text + "\r\nYour public key : " + pubkeyTB.Text + "\r\n" + @"Register at :  https://testnet.eontechnology.org/" + "\r\n");
+                            DebugMsg("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n");
+                            registerWarning = true;
+                        }
+                    }
+                }
+                else
+                {
+                    DebugLogMsg("UpdateBalance() - unexpected response : " + stateResponse);
+                }
+            }
+            catch (Exception ex)
+            {
+                DebugLogMsg("Exception in UpdateBalance() - " + ex.Message);
+            }
+        }
+
+        //called by UpdateBalance() , does the final write to form components by invoking itself on the form thread
+        private void SyncGUIBalance(string balance, string deposit)
         {
             if (this.balanceLBL.InvokeRequired)
             {
-                SetBalanceUpdateCallback d = new SetBalanceUpdateCallback(UpdateBalance);
-                this.Invoke(d, new object[] { stateResponse });
+                SetSyncGUIBalanceCallback d = new SetSyncGUIBalanceCallback(SyncGUIBalance);
+                this.Invoke(d, new object[] { balance, deposit });
             }
             else
             {
-                try
-                {
-
-                    //locate the braces containing json response
-                    int ind1 = stateResponse.IndexOf('{');
-                    int ind2 = stateResponse.LastIndexOf('}');
-
-                    if ((stateResponse != "-1") && (!stateResponse.Contains("null")) && (ind1 != -1) && (ind2 != -1))
-                    {
-                        string jsonResponse = stateResponse.Substring(ind1, ind2 - ind1 + 1);
-
-                        //deserialise the response
-                        ResponseClass oResp = new ResponseClass();
-                        oResp = JsonConvert.DeserializeObject<ResponseClass>(jsonResponse);
-
-                        //report values if OK
-                        if (oResp.State.Code == 200)
-                        {
-                            balanceLBL.Text = oResp.Amount.ToString();
-                            depositLBL.Text = oResp.Deposit.ToString();
-
-                        }
-                        else if (oResp.State.Code == 404)
-                        {
-                            balanceLBL.Text = "404: Account not found";
-                            depositLBL.Text = "404: Account not found";
-
-                            //display message for user to register this info with exscudo....
-                            if (!registerWarning)
-                            {
-                                DebugMsg("~~~  Your account cannot be found. To register it with Exscudo you will need these details : ~~~\r\nYour email\r\nYour account ID : " + accountTB.Text + "\r\nYour public key : " + pubkeyTB.Text + "\r\n" + @"Register at :  https://testnet.eontechnology.org/" + "\r\n");
-                                DebugMsg("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n");
-                                registerWarning = true;
-                            }
-
-                        }
-                    }
-                    else
-                    {
-                        DebugMsg("Error checking balance, unexpected response : " + stateResponse);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    DebugMsg("Exception in UpdateBalance() - " + ex.Message);
-                    LogMsg("Exception in UpdateBalance() - " + ex.Message);
-                }
-
+                //refresh if needed
+                if (balanceLBL.Text != balance) balanceLBL.Text = balance;
+                if (depositLBL.Text != deposit) depositLBL.Text = deposit;
             }
-
-            return;
         }
 
+
         private void CheckInstall()
-        {
+        {            
+            //check / create our application data folder in the users %APPDATA% folder
+            if (!Directory.Exists(appPath))
+            {
+                Directory.CreateDirectory(appPath);
+            }
+
             //test if eon.exe exists in the local folder
-            if (File.Exists(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + @"\eon.cli.windows\eon.exe"))
+            if (File.Exists(appPath + @"\eon.cli.windows\eon.exe"))
             {
                 //debugMsg("eon already present");
 
@@ -200,11 +278,11 @@ namespace ExscudoTestnetGUI
             {
                 Thread.Sleep(100);
                 DebugMsg(">eon install not found - downloading....");
-                
+
                 //try to delete the eon.cli.windows.zip file if it exists
                 try
                 {
-                    File.Delete(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + @"\eon.cli.windows.zip");
+                    File.Delete(appPath + @"\eon.cli.windows.zip");
                 }
                 catch (Exception ex)
                 {
@@ -215,7 +293,7 @@ namespace ExscudoTestnetGUI
                 //remove the eon.cli.windows directory if its present
                 try
                 {
-                    Directory.Delete(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + @"\eon.cli.windows");
+                    Directory.Delete(appPath + @"\eon.cli.windows");
                 }
                 catch (Exception ex)
                 {
@@ -229,7 +307,7 @@ namespace ExscudoTestnetGUI
                     using (var client = new WebClient())
                     {
 
-                        client.DownloadFile("https://testnet.eontechnology.org/client/eon.cli.windows.zip", Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + @"\eon.cli.windows.zip");
+                        client.DownloadFile("https://testnet.eontechnology.org/client/eon.cli.windows.zip", appPath + @"\eon.cli.windows.zip");
                         DebugMsg("OK\r\nUnpacking eon.cli.windows ....");
                         Thread.Sleep(100);
                     }
@@ -237,7 +315,7 @@ namespace ExscudoTestnetGUI
                     try
                     {
                         //unpack the file
-                        ZipFile.ExtractToDirectory(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + @"\eon.cli.windows.zip", Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + @"\eon.cli.windows");
+                        ZipFile.ExtractToDirectory(appPath + @"\eon.cli.windows.zip", appPath + @"\eon.cli.windows");
                         DebugMsg("OK\r\n");
                         Thread.Sleep(100);
                     }
@@ -251,7 +329,7 @@ namespace ExscudoTestnetGUI
                     //try to delete the eon.cli.windows.zip file if it exists
                     try
                     {
-                        File.Delete(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + @"\eon.cli.windows.zip");
+                        File.Delete(appPath + @"\eon.cli.windows.zip");
                     }
                     catch (Exception ex)
                     {
@@ -261,7 +339,7 @@ namespace ExscudoTestnetGUI
                 }
                 catch (Exception ex)
                 {
-                    DebugMsg("failed to download eon.cli.windows.zip : "  + ex.Message);
+                    DebugMsg("failed to download eon.cli.windows.zip : " + ex.Message);
                     Thread.Sleep(100);
                 }
 
@@ -271,7 +349,7 @@ namespace ExscudoTestnetGUI
                 //try to delete the openssl zip file if it exists
                 try
                 {
-                    File.Delete(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + @"\openssl-0.9.8r-x64_86-win64-rev2.zip");
+                    File.Delete(appPath + @"\openssl-0.9.8r-x64_86-win64-rev2.zip");
                 }
                 catch (Exception ex)
                 {
@@ -282,7 +360,7 @@ namespace ExscudoTestnetGUI
                 //remove the openssl directory if its present
                 try
                 {
-                    Directory.Delete(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + @"\openssl-0.9.8r-x64_86-win64-rev2");
+                    Directory.Delete(appPath + @"\openssl-0.9.8r-x64_86-win64-rev2");
                 }
                 catch (Exception ex)
                 {
@@ -296,7 +374,7 @@ namespace ExscudoTestnetGUI
                     using (var client = new WebClient())
                     {
                         Thread.Sleep(100);
-                        client.DownloadFile("https://indy.fulgan.com/SSL/openssl-0.9.8r-x64_86-win64-rev2.zip", Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + @"\openssl-0.9.8r-x64_86-win64-rev2.zip");
+                        client.DownloadFile("https://indy.fulgan.com/SSL/openssl-0.9.8r-x64_86-win64-rev2.zip", appPath + @"\openssl-0.9.8r-x64_86-win64-rev2.zip");
                         DebugMsg("OK\r\nUnpacking openssl ....");
                     }
 
@@ -304,7 +382,7 @@ namespace ExscudoTestnetGUI
                     {
                         //unpack the file
                         Thread.Sleep(100);
-                        ZipFile.ExtractToDirectory(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) +  @"\openssl-0.9.8r-x64_86-win64-rev2.zip", Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
+                        ZipFile.ExtractToDirectory(appPath + @"\openssl-0.9.8r-x64_86-win64-rev2.zip", appPath);
                         DebugMsg("OK\r\n");
                     }
                     catch (Exception ex)
@@ -316,7 +394,7 @@ namespace ExscudoTestnetGUI
                     //try to delete the openssl zip file if it exists to tidy up
                     try
                     {
-                        File.Delete(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + @"\openssl-0.9.8r-x64_86-win64-rev2.zip");
+                        File.Delete(appPath + @"\openssl-0.9.8r-x64_86-win64-rev2.zip");
                     }
                     catch (Exception ex)
                     {
@@ -328,12 +406,14 @@ namespace ExscudoTestnetGUI
                 }
                 catch (Exception ex)
                 {
-                    DebugMsg("failed to download openssl: "  + ex.Message);
+                    DebugMsg("failed to download openssl: " + ex.Message);
                     Thread.Sleep(330);
                 }
 
-
             }
+
+        
+    
 
             //read the config.json file into the conf object
             if (ReadConfig())
@@ -346,15 +426,33 @@ namespace ExscudoTestnetGUI
             {
                 //create the seed hex using openssl
                 DebugMsg("Generating new seed key and upating config...");
-                Directory.SetCurrentDirectory(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + @"\openssl-0.9.8r-x64_86-win64-rev2");
+                Directory.SetCurrentDirectory(appPath + @"\openssl-0.9.8r-x64_86-win64-rev2");
                 string hexString = ExecuteCommandSync(@"openssl rand -hex 32");
-                Directory.SetCurrentDirectory(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
+                Directory.SetCurrentDirectory(appPath);
                 hexString = hexString.Trim();
                 conf.Payouts.Seed = hexString;
                 WriteConfig();
                 DebugMsg("OK\r\n(Seed Hex: " + hexString + ")\r\n\r\n");
 
-                string res = EonCMD("eon info");
+                string infoResponse = EonCMD("eon info");
+                Match infoMatch = Regex.Match(infoResponse, @"Seed:\s*(.*)\s*Account:\s*(.*)\s*Public key:\s*(.*)\s*end...");
+
+                if (infoMatch.Groups.Count == 4)
+                {
+                    //string seedString = infoMatch.Groups[1].ToString();
+                    string accountString = infoMatch.Groups[2].ToString();
+                    string pubkeyString = infoMatch.Groups[3].ToString();
+
+                    //display message for user to register this info with exscudo....
+                    DebugMsg("~~~  New account has been created - register it with Exscudo. You will need these details : ~~~\r\nYour email\r\nYour account ID : " + accountString + "\r\nYour public key : " + pubkeyString + "\r\n" + @"Register at :  https://testnet.eontechnology.org/" + "\r\n");
+                    DebugMsg("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n");
+                }
+                else
+                {
+                    DebugLogMsg("UpdateAccountInfo() - Error parsing info response : " + infoResponse);
+                }
+
+/*
                 int accInd1 = res.LastIndexOf("Account:") + 10;
                 int accInd2 = res.IndexOf(" ", accInd1);
                 string accountString = res.Substring(accInd1, accInd2 - accInd1);
@@ -365,10 +463,8 @@ namespace ExscudoTestnetGUI
                 int pubkeyInd2 = res.IndexOf("\r\n", pubkeyInd1);
                 string pubkeyString = res.Substring(pubkeyInd1, pubkeyInd2 - pubkeyInd1);
                 //debugMsg("Public key : " + pubkeyString + "\r\n");
-
-                //display message for user to register this info with exscudo....
-                DebugMsg("~~~  New account has been created - register it with Exscudo. You will need these details : ~~~\r\nYour email\r\nYour account ID : " + accountString + "\r\nYour public key : " + pubkeyString + "\r\n" + @"Register at :  https://testnet.eontechnology.org/" + "\r\n");
-                DebugMsg("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n");
+                */
+                
 
                 BackupRestore();
                 
@@ -448,30 +544,30 @@ namespace ExscudoTestnetGUI
             }
         }
 
-        private void UpdateAccountInfo(string res)
+        //updates the GUI account information fields. takes the 'eon info' response as its input and invokes itself on form thread
+        private void UpdateAccountInfo(string infoResponse)
         {
             if (accountTB.InvokeRequired)
             {
                 SetAccountInfoCallback d = new SetAccountInfoCallback(UpdateAccountInfo);
-                this.Invoke(d, new object[] {res});
+                this.Invoke(d, new object[] {infoResponse});
             }
             else
             {
                 try
                 {
-                    int accInd1 = res.LastIndexOf("Account:") + 10;
-                    int accInd2 = res.IndexOf(" ", accInd1);
-                    string accountString = res.Substring(accInd1, accInd2 - accInd1);
-                    accountString = accountString.Trim();
-                    //debugMsg("Account ID : " + accountString + "\r\n");
+                    Match infoMatch = Regex.Match(infoResponse, @"Seed:\s*(.*)\s*Account:\s*(.*)\s*Public key:\s*(.*)\s*end...");
 
-                    int pubkeyInd1 = res.LastIndexOf("key:") + 6;
-                    int pubkeyInd2 = res.IndexOf("\r\n", pubkeyInd1);
-                    string pubkeyString = res.Substring(pubkeyInd1, pubkeyInd2 - pubkeyInd1);
-
-                    accountTB.Text = accountString;
-                    rxAddressLBL.Text = accountString;
-                    pubkeyTB.Text = pubkeyString;
+                    if(infoMatch.Groups.Count==4)
+                    {
+                        accountTB.Text = infoMatch.Groups[2].ToString();
+                        rxAddressLBL.Text = infoMatch.Groups[2].ToString();
+                        pubkeyTB.Text = infoMatch.Groups[3].ToString();
+                    }
+                    else
+                    {
+                        DebugLogMsg("UpdateAccountInfo() - Error parsing info response : " + infoResponse);
+                    }
                 }
                 catch(Exception ex)
                 {
@@ -626,6 +722,31 @@ namespace ExscudoTestnetGUI
             }
         }
 
+        private void DebugLogMsg(string line)
+        {
+            if (this.debugTB.InvokeRequired)
+            {
+                SetDebugCallback d = new SetDebugCallback(DebugMsg);
+                this.Invoke(d, new object[] { line });
+            }
+            else
+            {
+                if (debugTB.Text.Length > 10000)
+                {
+                    debugTB.Text = debugTB.Text.Remove(0, 500);
+                }
+
+                debugTB.Text += (DateTime.Now.ToLongTimeString() + ": " + line + "\r\n");
+                //debugTB.Text += line;
+                this.debugTB.SelectionStart = debugTB.Text.Length;
+                this.debugTB.ScrollToCaret();
+                this.debugTB.Update();
+
+                LogMsg(line);
+
+            }
+        }
+
         private void DebugClear()
         {
             if (this.debugTB.InvokeRequired)
@@ -690,7 +811,7 @@ namespace ExscudoTestnetGUI
 
             try
             {
-                string configString = File.ReadAllText(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + @"\eon.cli.windows\config.json");
+                string configString = File.ReadAllText(appPath + @"\eon.cli.windows\config.json");
 
                 conf = JsonConvert.DeserializeObject<configClass>(configString);
 
@@ -707,7 +828,7 @@ namespace ExscudoTestnetGUI
         private void WriteConfig()
         {
             string jsonData = JsonConvert.SerializeObject(conf);
-            File.WriteAllText(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + @"\eon.cli.windows\config.json", jsonData);
+            File.WriteAllText(appPath + @"\eon.cli.windows\config.json", jsonData);
         }
 
         // returns the raw cmds response, or -1 for failure
@@ -737,6 +858,7 @@ namespace ExscudoTestnetGUI
                     StartInfo = procStartInfo
                 };
                 proc.Start();
+
                 // Get the output into a string
                 result = proc.StandardOutput.ReadToEnd();
                 // Display the command output.
@@ -781,6 +903,7 @@ namespace ExscudoTestnetGUI
         private void CommitBTN_Click(object sender, EventArgs e)
         {
             string commitResponse = EonCMD("eon commit " + accountTB.Text);
+            //string commitResponse = EonCMD("eon commit " + "EON-R6RKE-PU4QA-V3DSP");
             if (commitResponse!="-1") UpdateCommited(commitResponse);           
         }
 
