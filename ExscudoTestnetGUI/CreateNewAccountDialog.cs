@@ -21,14 +21,14 @@ namespace ExscudoTestnetGUI
             InitializeComponent();
         }
 
-        private void createButton_Click(object sender, EventArgs e)
+        private void CreateButton_Click(object sender, EventArgs e)
         {
             nickname = nicknameTB.Text;
             result = "Create";
             this.Dispose();
         }
 
-        private void cancelButton_Click(object sender, EventArgs e)
+        private void CancelButton_Click(object sender, EventArgs e)
         {
             this.result = "Cancel";
             this.Dispose();

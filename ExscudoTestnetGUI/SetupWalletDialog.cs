@@ -22,21 +22,21 @@ namespace ExscudoTestnetGUI
         }
 
         //create new button
-        private void button1_Click(object sender, EventArgs e)
+        private void Button1_Click(object sender, EventArgs e)
         {
             this.result = "Create";
             this.Dispose();
         }
 
         // import button
-        private void button2_Click(object sender, EventArgs e)
+        private void Button2_Click(object sender, EventArgs e)
         {
             this.result = "Import";
             this.Dispose();
         }
 
         //set SEED button
-        private void button4_Click(object sender, EventArgs e)
+        private void Button4_Click(object sender, EventArgs e)
         {
             this.result = "Set";
             seedVal = seedTB.Text;
@@ -45,7 +45,7 @@ namespace ExscudoTestnetGUI
 
 
         //cancel button
-        private void button3_Click(object sender, EventArgs e)
+        private void Button3_Click(object sender, EventArgs e)
         {
             this.result = "Cancel";
             this.Dispose();

@@ -40,11 +40,6 @@ namespace ExscudoTestnetGUI
         delegate void SetAccountCheckImportCreateCallback();
         delegate void SetSelectedAccountCallback(int index);
 
-
-
-        //trips once per start to dispaly a message in debugTB if the account looks like its not registered with exscudo
-        bool registerWarning = false;
-
         //define a thread which will process away from form thread.
         Thread eonThread;
         bool eonThreadRun = true;
@@ -1829,7 +1824,7 @@ namespace ExscudoTestnetGUI
             }
         }
 
-        private void rebuildWorkingFoldersToolStripMenuItem_Click(object sender, EventArgs e)
+        private void RebuildWorkingFoldersToolStripMenuItem_Click(object sender, EventArgs e)
         {
             //allow eon thread to shut down
             eonThreadRun = false;
@@ -1904,7 +1899,7 @@ namespace ExscudoTestnetGUI
         }
 
 
-        private void resetAllConfigToolStripMenuItem_Click(object sender, EventArgs e)
+        private void ResetAllConfigToolStripMenuItem_Click(object sender, EventArgs e)
         {
             //allow eon thread to shut down
             eonThreadRun = false;
@@ -1915,7 +1910,7 @@ namespace ExscudoTestnetGUI
         }
 
         //create new account button
-        private void createAccountBTN_Click(object sender, EventArgs e)
+        private void CreateAccountBTN_Click(object sender, EventArgs e)
         {
             //allow eon thread to shut down
             //eonThreadRun = false;

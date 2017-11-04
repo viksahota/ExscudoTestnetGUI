@@ -1067,14 +1067,14 @@
             this.rebuildWorkingFoldersToolStripMenuItem.Name = "rebuildWorkingFoldersToolStripMenuItem";
             this.rebuildWorkingFoldersToolStripMenuItem.Size = new System.Drawing.Size(291, 30);
             this.rebuildWorkingFoldersToolStripMenuItem.Text = "Rebuild Working Folders";
-            this.rebuildWorkingFoldersToolStripMenuItem.Click += new System.EventHandler(this.rebuildWorkingFoldersToolStripMenuItem_Click);
+            this.rebuildWorkingFoldersToolStripMenuItem.Click += new System.EventHandler(this.RebuildWorkingFoldersToolStripMenuItem_Click);
             // 
             // resetAllConfigToolStripMenuItem
             // 
             this.resetAllConfigToolStripMenuItem.Name = "resetAllConfigToolStripMenuItem";
             this.resetAllConfigToolStripMenuItem.Size = new System.Drawing.Size(291, 30);
             this.resetAllConfigToolStripMenuItem.Text = "Reset All Config";
-            this.resetAllConfigToolStripMenuItem.Click += new System.EventHandler(this.resetAllConfigToolStripMenuItem_Click);
+            this.resetAllConfigToolStripMenuItem.Click += new System.EventHandler(this.ResetAllConfigToolStripMenuItem_Click);
             // 
             // quitToolStripMenuItem
             // 
@@ -1149,7 +1149,7 @@
             this.createAccountBTN.TabIndex = 25;
             this.createAccountBTN.Text = "Create new account";
             this.createAccountBTN.UseVisualStyleBackColor = true;
-            this.createAccountBTN.Click += new System.EventHandler(this.createAccountBTN_Click);
+            this.createAccountBTN.Click += new System.EventHandler(this.CreateAccountBTN_Click);
             // 
             // Form1
             // 
