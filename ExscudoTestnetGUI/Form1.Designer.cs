@@ -36,9 +36,11 @@
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.walletTab = new System.Windows.Forms.TabPage();
             this.groupBox12 = new System.Windows.Forms.GroupBox();
-            this.objectListView1 = new BrightIdeasSoftware.ObjectListView();
+            this.accountLV = new BrightIdeasSoftware.ObjectListView();
             this.olvColumn1 = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.olvColumn2 = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.olvColumn3 = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.olvColumn4 = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.groupBox11 = new System.Windows.Forms.GroupBox();
             this.groupBox7 = new System.Windows.Forms.GroupBox();
             this.rxAddressLBL = new System.Windows.Forms.Label();
@@ -60,11 +62,21 @@
             this.balDepAmountTB = new System.Windows.Forms.TextBox();
             this.refillBTN = new System.Windows.Forms.Button();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.tranactionsTab = new System.Windows.Forms.TabPage();
+            this.uncommitBTN = new System.Windows.Forms.Button();
+            this.transactionLV = new BrightIdeasSoftware.ObjectListView();
+            this.timestampColumn = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.typeColumn = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.amountColumn = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.feeColumn = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.recipientColumn = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.signatureColumn = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.configTab = new System.Windows.Forms.TabPage();
             this.groupBox9 = new System.Windows.Forms.GroupBox();
             this.logScrollCB = new System.Windows.Forms.CheckBox();
             this.writeConfigBTN = new System.Windows.Forms.Button();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.payoutRawCB = new System.Windows.Forms.CheckBox();
             this.payoutThresholdNM = new System.Windows.Forms.NumericUpDown();
             this.label10 = new System.Windows.Forms.Label();
             this.payoutTimeoutNM = new System.Windows.Forms.NumericUpDown();
@@ -89,17 +101,6 @@
             this.label2 = new System.Windows.Forms.Label();
             this.rootThreadsNM = new System.Windows.Forms.NumericUpDown();
             this.label1 = new System.Windows.Forms.Label();
-            this.tranactionsTab = new System.Windows.Forms.TabPage();
-            this.uncommitBTN = new System.Windows.Forms.Button();
-            this.transactionLV = new BrightIdeasSoftware.ObjectListView();
-            this.typeColumn = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
-            this.timestampColumn = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
-            this.deadlineColumn = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
-            this.feeColumn = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
-            this.senderColumn = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
-            this.signatureColumn = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
-            this.amountColumn = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
-            this.recipientColumn = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.logTab = new System.Windows.Forms.TabPage();
             this.logTB = new System.Windows.Forms.TextBox();
             this.pubkeyTB = new System.Windows.Forms.TextBox();
@@ -110,21 +111,22 @@
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.importConfigjsonToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exportConfigjsonToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.rebuildWorkingFoldersToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.resetAllConfigToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.quitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cMDToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.eonCommandLineToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.opensslCommandLineToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openWorkingFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openExscudoRegistationWebsiteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panel1 = new System.Windows.Forms.Panel();
-            this.olvColumn3 = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.createAccountBTN = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.walletTab.SuspendLayout();
             this.groupBox12.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.objectListView1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.accountLV)).BeginInit();
             this.groupBox11.SuspendLayout();
             this.groupBox7.SuspendLayout();
             this.groupBox6.SuspendLayout();
@@ -132,6 +134,8 @@
             this.groupBox5.SuspendLayout();
             this.groupBox8.SuspendLayout();
             this.groupBox2.SuspendLayout();
+            this.tranactionsTab.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.transactionLV)).BeginInit();
             this.configTab.SuspendLayout();
             this.groupBox9.SuspendLayout();
             this.groupBox4.SuspendLayout();
@@ -143,8 +147,6 @@
             this.groupBox3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.rootIntervalNM)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.rootThreadsNM)).BeginInit();
-            this.tranactionsTab.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.transactionLV)).BeginInit();
             this.logTab.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -155,6 +157,7 @@
             this.debugTB.Location = new System.Drawing.Point(21, 25);
             this.debugTB.Multiline = true;
             this.debugTB.Name = "debugTB";
+            this.debugTB.ReadOnly = true;
             this.debugTB.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.debugTB.Size = new System.Drawing.Size(1450, 541);
             this.debugTB.TabIndex = 0;
@@ -165,7 +168,7 @@
             this.commitBTN.Name = "commitBTN";
             this.commitBTN.Size = new System.Drawing.Size(216, 48);
             this.commitBTN.TabIndex = 5;
-            this.commitBTN.Text = "Commited Transactions";
+            this.commitBTN.Text = "Confirmed Transactions";
             this.commitBTN.UseVisualStyleBackColor = true;
             this.commitBTN.Click += new System.EventHandler(this.CommitBTN_Click);
             // 
@@ -202,8 +205,8 @@
             // tabControl1
             // 
             this.tabControl1.Controls.Add(this.walletTab);
-            this.tabControl1.Controls.Add(this.configTab);
             this.tabControl1.Controls.Add(this.tranactionsTab);
+            this.tabControl1.Controls.Add(this.configTab);
             this.tabControl1.Controls.Add(this.logTab);
             this.tabControl1.Location = new System.Drawing.Point(11, 92);
             this.tabControl1.Name = "tabControl1";
@@ -227,7 +230,8 @@
             // 
             // groupBox12
             // 
-            this.groupBox12.Controls.Add(this.objectListView1);
+            this.groupBox12.Controls.Add(this.createAccountBTN);
+            this.groupBox12.Controls.Add(this.accountLV);
             this.groupBox12.Location = new System.Drawing.Point(18, 18);
             this.groupBox12.Name = "groupBox12";
             this.groupBox12.Size = new System.Drawing.Size(557, 420);
@@ -235,31 +239,58 @@
             this.groupBox12.TabStop = false;
             this.groupBox12.Text = "Accounts";
             // 
-            // objectListView1
+            // accountLV
             // 
-            this.objectListView1.AllColumns.Add(this.olvColumn1);
-            this.objectListView1.AllColumns.Add(this.olvColumn2);
-            this.objectListView1.AllColumns.Add(this.olvColumn3);
-            this.objectListView1.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.accountLV.Activation = System.Windows.Forms.ItemActivation.OneClick;
+            this.accountLV.AllColumns.Add(this.olvColumn1);
+            this.accountLV.AllColumns.Add(this.olvColumn2);
+            this.accountLV.AllColumns.Add(this.olvColumn3);
+            this.accountLV.AllColumns.Add(this.olvColumn4);
+            this.accountLV.AlternateRowBackColor = System.Drawing.Color.White;
+            this.accountLV.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.olvColumn1,
             this.olvColumn2,
-            this.olvColumn3});
-            this.objectListView1.Location = new System.Drawing.Point(21, 34);
-            this.objectListView1.Name = "objectListView1";
-            this.objectListView1.Size = new System.Drawing.Size(515, 365);
-            this.objectListView1.TabIndex = 0;
-            this.objectListView1.UseCompatibleStateImageBehavior = false;
-            this.objectListView1.View = System.Windows.Forms.View.Details;
+            this.olvColumn3,
+            this.olvColumn4});
+            this.accountLV.Cursor = System.Windows.Forms.Cursors.Default;
+            this.accountLV.FullRowSelect = true;
+            this.accountLV.GridLines = true;
+            this.accountLV.HasCollapsibleGroups = false;
+            this.accountLV.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
+            this.accountLV.HideSelection = false;
+            this.accountLV.Location = new System.Drawing.Point(6, 29);
+            this.accountLV.MultiSelect = false;
+            this.accountLV.Name = "accountLV";
+            this.accountLV.SelectAllOnControlA = false;
+            this.accountLV.ShowGroups = false;
+            this.accountLV.Size = new System.Drawing.Size(545, 341);
+            this.accountLV.TabIndex = 0;
+            this.accountLV.UseCompatibleStateImageBehavior = false;
+            this.accountLV.UseHotItem = true;
+            this.accountLV.View = System.Windows.Forms.View.Details;
+            this.accountLV.SelectionChanged += new System.EventHandler(this.AccountLV_SelectionChanged);
             // 
             // olvColumn1
             // 
+            this.olvColumn1.AspectName = "NickName";
             this.olvColumn1.Text = "Name";
-            this.olvColumn1.Width = 66;
             // 
             // olvColumn2
             // 
+            this.olvColumn2.AspectName = "AccountID";
             this.olvColumn2.Text = "Account ID";
-            this.olvColumn2.Width = 118;
+            this.olvColumn2.Width = 160;
+            // 
+            // olvColumn3
+            // 
+            this.olvColumn3.AspectName = "Balance";
+            this.olvColumn3.Text = "Balance";
+            this.olvColumn3.Width = 80;
+            // 
+            // olvColumn4
+            // 
+            this.olvColumn4.AspectName = "Deposit";
+            this.olvColumn4.Text = "Deposit";
             // 
             // groupBox11
             // 
@@ -478,6 +509,92 @@
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Debug View";
             // 
+            // tranactionsTab
+            // 
+            this.tranactionsTab.Controls.Add(this.uncommitBTN);
+            this.tranactionsTab.Controls.Add(this.transactionLV);
+            this.tranactionsTab.Controls.Add(this.commitBTN);
+            this.tranactionsTab.Location = new System.Drawing.Point(4, 29);
+            this.tranactionsTab.Name = "tranactionsTab";
+            this.tranactionsTab.Size = new System.Drawing.Size(1517, 1059);
+            this.tranactionsTab.TabIndex = 2;
+            this.tranactionsTab.Text = "Transactions";
+            this.tranactionsTab.UseVisualStyleBackColor = true;
+            // 
+            // uncommitBTN
+            // 
+            this.uncommitBTN.Location = new System.Drawing.Point(252, 29);
+            this.uncommitBTN.Name = "uncommitBTN";
+            this.uncommitBTN.Size = new System.Drawing.Size(216, 48);
+            this.uncommitBTN.TabIndex = 7;
+            this.uncommitBTN.Text = "Pending Transactions";
+            this.uncommitBTN.UseVisualStyleBackColor = true;
+            this.uncommitBTN.Click += new System.EventHandler(this.UncommitBTN_Click);
+            // 
+            // transactionLV
+            // 
+            this.transactionLV.AllColumns.Add(this.timestampColumn);
+            this.transactionLV.AllColumns.Add(this.typeColumn);
+            this.transactionLV.AllColumns.Add(this.amountColumn);
+            this.transactionLV.AllColumns.Add(this.feeColumn);
+            this.transactionLV.AllColumns.Add(this.recipientColumn);
+            this.transactionLV.AllColumns.Add(this.signatureColumn);
+            this.transactionLV.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.timestampColumn,
+            this.typeColumn,
+            this.amountColumn,
+            this.feeColumn,
+            this.recipientColumn,
+            this.signatureColumn});
+            this.transactionLV.Location = new System.Drawing.Point(21, 83);
+            this.transactionLV.Name = "transactionLV";
+            this.transactionLV.ShowGroups = false;
+            this.transactionLV.Size = new System.Drawing.Size(1482, 960);
+            this.transactionLV.TabIndex = 6;
+            this.transactionLV.UseCompatibleStateImageBehavior = false;
+            this.transactionLV.View = System.Windows.Forms.View.Details;
+            // 
+            // timestampColumn
+            // 
+            this.timestampColumn.AspectName = "TimestampString";
+            this.timestampColumn.AutoCompleteEditor = false;
+            this.timestampColumn.AutoCompleteEditorMode = System.Windows.Forms.AutoCompleteMode.None;
+            this.timestampColumn.IsEditable = false;
+            this.timestampColumn.IsTileViewColumn = true;
+            this.timestampColumn.Text = "Timestamp";
+            this.timestampColumn.Width = 140;
+            // 
+            // typeColumn
+            // 
+            this.typeColumn.AspectName = "TypeString";
+            this.typeColumn.Text = "Type";
+            this.typeColumn.Width = 90;
+            // 
+            // amountColumn
+            // 
+            this.amountColumn.AspectName = "Attachment.Amount";
+            this.amountColumn.Text = "Amount";
+            this.amountColumn.Width = 80;
+            // 
+            // feeColumn
+            // 
+            this.feeColumn.AspectName = "Fee";
+            this.feeColumn.Text = "Fee";
+            this.feeColumn.Width = 50;
+            // 
+            // recipientColumn
+            // 
+            this.recipientColumn.AspectName = "Attachment.Recipient";
+            this.recipientColumn.Text = "Recipient";
+            this.recipientColumn.Width = 150;
+            // 
+            // signatureColumn
+            // 
+            this.signatureColumn.AspectName = "Signature";
+            this.signatureColumn.Text = "Signature";
+            this.signatureColumn.Width = 280;
+            this.signatureColumn.WordWrap = true;
+            // 
             // configTab
             // 
             this.configTab.Controls.Add(this.groupBox9);
@@ -517,7 +634,7 @@
             // 
             // writeConfigBTN
             // 
-            this.writeConfigBTN.Location = new System.Drawing.Point(313, 886);
+            this.writeConfigBTN.Location = new System.Drawing.Point(321, 973);
             this.writeConfigBTN.Name = "writeConfigBTN";
             this.writeConfigBTN.Size = new System.Drawing.Size(263, 59);
             this.writeConfigBTN.TabIndex = 2;
@@ -527,6 +644,7 @@
             // 
             // groupBox4
             // 
+            this.groupBox4.Controls.Add(this.payoutRawCB);
             this.groupBox4.Controls.Add(this.payoutThresholdNM);
             this.groupBox4.Controls.Add(this.label10);
             this.groupBox4.Controls.Add(this.payoutTimeoutNM);
@@ -544,14 +662,26 @@
             this.groupBox4.Controls.Add(this.label6);
             this.groupBox4.Location = new System.Drawing.Point(49, 435);
             this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(776, 407);
+            this.groupBox4.Size = new System.Drawing.Size(776, 503);
             this.groupBox4.TabIndex = 1;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Payouts";
             // 
+            // payoutRawCB
+            // 
+            this.payoutRawCB.AutoSize = true;
+            this.payoutRawCB.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.payoutRawCB.Enabled = false;
+            this.payoutRawCB.Location = new System.Drawing.Point(61, 301);
+            this.payoutRawCB.Name = "payoutRawCB";
+            this.payoutRawCB.Size = new System.Drawing.Size(75, 24);
+            this.payoutRawCB.TabIndex = 18;
+            this.payoutRawCB.Text = "Raw: ";
+            this.payoutRawCB.UseVisualStyleBackColor = true;
+            // 
             // payoutThresholdNM
             // 
-            this.payoutThresholdNM.Location = new System.Drawing.Point(114, 344);
+            this.payoutThresholdNM.Location = new System.Drawing.Point(114, 385);
             this.payoutThresholdNM.Maximum = new decimal(new int[] {
             1410065408,
             2,
@@ -574,7 +704,7 @@
             // label10
             // 
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(23, 347);
+            this.label10.Location = new System.Drawing.Point(23, 388);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(87, 20);
             this.label10.TabIndex = 17;
@@ -582,7 +712,7 @@
             // 
             // payoutTimeoutNM
             // 
-            this.payoutTimeoutNM.Location = new System.Drawing.Point(113, 302);
+            this.payoutTimeoutNM.Location = new System.Drawing.Point(113, 343);
             this.payoutTimeoutNM.Maximum = new decimal(new int[] {
             1000,
             0,
@@ -605,7 +735,7 @@
             // label11
             // 
             this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(17, 304);
+            this.label11.Location = new System.Drawing.Point(17, 345);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(92, 20);
             this.label11.TabIndex = 15;
@@ -838,106 +968,6 @@
             this.label1.TabIndex = 0;
             this.label1.Text = "Threads :";
             // 
-            // tranactionsTab
-            // 
-            this.tranactionsTab.Controls.Add(this.uncommitBTN);
-            this.tranactionsTab.Controls.Add(this.transactionLV);
-            this.tranactionsTab.Controls.Add(this.commitBTN);
-            this.tranactionsTab.Location = new System.Drawing.Point(4, 29);
-            this.tranactionsTab.Name = "tranactionsTab";
-            this.tranactionsTab.Size = new System.Drawing.Size(1517, 1059);
-            this.tranactionsTab.TabIndex = 2;
-            this.tranactionsTab.Text = "Transactions";
-            this.tranactionsTab.UseVisualStyleBackColor = true;
-            // 
-            // uncommitBTN
-            // 
-            this.uncommitBTN.Location = new System.Drawing.Point(252, 29);
-            this.uncommitBTN.Name = "uncommitBTN";
-            this.uncommitBTN.Size = new System.Drawing.Size(216, 48);
-            this.uncommitBTN.TabIndex = 7;
-            this.uncommitBTN.Text = "Uncommited Transactions";
-            this.uncommitBTN.UseVisualStyleBackColor = true;
-            this.uncommitBTN.Click += new System.EventHandler(this.UncommitBTN_Click);
-            // 
-            // transactionLV
-            // 
-            this.transactionLV.AllColumns.Add(this.typeColumn);
-            this.transactionLV.AllColumns.Add(this.timestampColumn);
-            this.transactionLV.AllColumns.Add(this.deadlineColumn);
-            this.transactionLV.AllColumns.Add(this.feeColumn);
-            this.transactionLV.AllColumns.Add(this.senderColumn);
-            this.transactionLV.AllColumns.Add(this.signatureColumn);
-            this.transactionLV.AllColumns.Add(this.amountColumn);
-            this.transactionLV.AllColumns.Add(this.recipientColumn);
-            this.transactionLV.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.typeColumn,
-            this.timestampColumn,
-            this.deadlineColumn,
-            this.feeColumn,
-            this.senderColumn,
-            this.signatureColumn,
-            this.amountColumn,
-            this.recipientColumn});
-            this.transactionLV.Location = new System.Drawing.Point(21, 104);
-            this.transactionLV.Name = "transactionLV";
-            this.transactionLV.Size = new System.Drawing.Size(1482, 937);
-            this.transactionLV.TabIndex = 6;
-            this.transactionLV.UseCompatibleStateImageBehavior = false;
-            this.transactionLV.View = System.Windows.Forms.View.Details;
-            // 
-            // typeColumn
-            // 
-            this.typeColumn.AspectName = "Type";
-            this.typeColumn.Text = "Type";
-            this.typeColumn.Width = 69;
-            // 
-            // timestampColumn
-            // 
-            this.timestampColumn.AspectName = "Timestamp";
-            this.timestampColumn.AutoCompleteEditor = false;
-            this.timestampColumn.AutoCompleteEditorMode = System.Windows.Forms.AutoCompleteMode.None;
-            this.timestampColumn.IsEditable = false;
-            this.timestampColumn.IsTileViewColumn = true;
-            this.timestampColumn.Text = "Timestamp";
-            this.timestampColumn.Width = 104;
-            // 
-            // deadlineColumn
-            // 
-            this.deadlineColumn.AspectName = "Deadline";
-            this.deadlineColumn.Text = "Deadline";
-            this.deadlineColumn.Width = 90;
-            // 
-            // feeColumn
-            // 
-            this.feeColumn.AspectName = "Fee";
-            this.feeColumn.Text = "Fee";
-            this.feeColumn.Width = 82;
-            // 
-            // senderColumn
-            // 
-            this.senderColumn.AspectName = "Sender";
-            this.senderColumn.Text = "Sender";
-            this.senderColumn.Width = 115;
-            // 
-            // signatureColumn
-            // 
-            this.signatureColumn.AspectName = "Signature";
-            this.signatureColumn.Text = "Signature";
-            this.signatureColumn.Width = 112;
-            // 
-            // amountColumn
-            // 
-            this.amountColumn.AspectName = "Attachment.Amount";
-            this.amountColumn.Text = "Amount";
-            this.amountColumn.Width = 120;
-            // 
-            // recipientColumn
-            // 
-            this.recipientColumn.AspectName = "Attachment.Recipient";
-            this.recipientColumn.Text = "Recipient";
-            this.recipientColumn.Width = 221;
-            // 
             // logTab
             // 
             this.logTab.Controls.Add(this.button1);
@@ -954,6 +984,7 @@
             this.logTB.Location = new System.Drawing.Point(14, 71);
             this.logTB.Multiline = true;
             this.logTB.Name = "logTB";
+            this.logTB.ReadOnly = true;
             this.logTB.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.logTB.Size = new System.Drawing.Size(1486, 971);
             this.logTB.TabIndex = 8;
@@ -1010,6 +1041,8 @@
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.importConfigjsonToolStripMenuItem,
             this.exportConfigjsonToolStripMenuItem,
+            this.rebuildWorkingFoldersToolStripMenuItem,
+            this.resetAllConfigToolStripMenuItem,
             this.quitToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(50, 29);
@@ -1018,21 +1051,35 @@
             // importConfigjsonToolStripMenuItem
             // 
             this.importConfigjsonToolStripMenuItem.Name = "importConfigjsonToolStripMenuItem";
-            this.importConfigjsonToolStripMenuItem.Size = new System.Drawing.Size(244, 30);
-            this.importConfigjsonToolStripMenuItem.Text = "Import config.json";
-            this.importConfigjsonToolStripMenuItem.Click += new System.EventHandler(this.ImportConfigjsonToolStripMenuItem_Click);
+            this.importConfigjsonToolStripMenuItem.Size = new System.Drawing.Size(291, 30);
+            this.importConfigjsonToolStripMenuItem.Text = "Import wallets.json";
+            this.importConfigjsonToolStripMenuItem.Click += new System.EventHandler(this.ImportWalletsjsonToolStripMenuItem_Click);
             // 
             // exportConfigjsonToolStripMenuItem
             // 
             this.exportConfigjsonToolStripMenuItem.Name = "exportConfigjsonToolStripMenuItem";
-            this.exportConfigjsonToolStripMenuItem.Size = new System.Drawing.Size(244, 30);
-            this.exportConfigjsonToolStripMenuItem.Text = "Export config.json";
-            this.exportConfigjsonToolStripMenuItem.Click += new System.EventHandler(this.ExportConfigjsonToolStripMenuItem_Click);
+            this.exportConfigjsonToolStripMenuItem.Size = new System.Drawing.Size(291, 30);
+            this.exportConfigjsonToolStripMenuItem.Text = "Export wallets.json";
+            this.exportConfigjsonToolStripMenuItem.Click += new System.EventHandler(this.ExportWalletsJsonToolStripMenuItem_Click);
+            // 
+            // rebuildWorkingFoldersToolStripMenuItem
+            // 
+            this.rebuildWorkingFoldersToolStripMenuItem.Name = "rebuildWorkingFoldersToolStripMenuItem";
+            this.rebuildWorkingFoldersToolStripMenuItem.Size = new System.Drawing.Size(291, 30);
+            this.rebuildWorkingFoldersToolStripMenuItem.Text = "Rebuild Working Folders";
+            this.rebuildWorkingFoldersToolStripMenuItem.Click += new System.EventHandler(this.rebuildWorkingFoldersToolStripMenuItem_Click);
+            // 
+            // resetAllConfigToolStripMenuItem
+            // 
+            this.resetAllConfigToolStripMenuItem.Name = "resetAllConfigToolStripMenuItem";
+            this.resetAllConfigToolStripMenuItem.Size = new System.Drawing.Size(291, 30);
+            this.resetAllConfigToolStripMenuItem.Text = "Reset All Config";
+            this.resetAllConfigToolStripMenuItem.Click += new System.EventHandler(this.resetAllConfigToolStripMenuItem_Click);
             // 
             // quitToolStripMenuItem
             // 
             this.quitToolStripMenuItem.Name = "quitToolStripMenuItem";
-            this.quitToolStripMenuItem.Size = new System.Drawing.Size(244, 30);
+            this.quitToolStripMenuItem.Size = new System.Drawing.Size(291, 30);
             this.quitToolStripMenuItem.Text = "Quit";
             this.quitToolStripMenuItem.Click += new System.EventHandler(this.QuitToolStripMenuItem_Click);
             // 
@@ -1040,7 +1087,6 @@
             // 
             this.cMDToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.eonCommandLineToolStripMenuItem,
-            this.opensslCommandLineToolStripMenuItem,
             this.openWorkingFolderToolStripMenuItem,
             this.openExscudoRegistationWebsiteToolStripMenuItem});
             this.cMDToolStripMenuItem.Name = "cMDToolStripMenuItem";
@@ -1050,28 +1096,21 @@
             // eonCommandLineToolStripMenuItem
             // 
             this.eonCommandLineToolStripMenuItem.Name = "eonCommandLineToolStripMenuItem";
-            this.eonCommandLineToolStripMenuItem.Size = new System.Drawing.Size(365, 30);
-            this.eonCommandLineToolStripMenuItem.Text = "eon command line";
+            this.eonCommandLineToolStripMenuItem.Size = new System.Drawing.Size(405, 30);
+            this.eonCommandLineToolStripMenuItem.Text = "eon command line [selected account]";
             this.eonCommandLineToolStripMenuItem.Click += new System.EventHandler(this.EonCommandLineToolStripMenuItem_Click);
-            // 
-            // opensslCommandLineToolStripMenuItem
-            // 
-            this.opensslCommandLineToolStripMenuItem.Name = "opensslCommandLineToolStripMenuItem";
-            this.opensslCommandLineToolStripMenuItem.Size = new System.Drawing.Size(365, 30);
-            this.opensslCommandLineToolStripMenuItem.Text = "openssl command line";
-            this.opensslCommandLineToolStripMenuItem.Click += new System.EventHandler(this.OpensslCommandLineToolStripMenuItem_Click);
             // 
             // openWorkingFolderToolStripMenuItem
             // 
             this.openWorkingFolderToolStripMenuItem.Name = "openWorkingFolderToolStripMenuItem";
-            this.openWorkingFolderToolStripMenuItem.Size = new System.Drawing.Size(365, 30);
-            this.openWorkingFolderToolStripMenuItem.Text = "open working folder";
+            this.openWorkingFolderToolStripMenuItem.Size = new System.Drawing.Size(405, 30);
+            this.openWorkingFolderToolStripMenuItem.Text = "open working folder [selected account]";
             this.openWorkingFolderToolStripMenuItem.Click += new System.EventHandler(this.OpenWorkingFolderToolStripMenuItem_Click);
             // 
             // openExscudoRegistationWebsiteToolStripMenuItem
             // 
             this.openExscudoRegistationWebsiteToolStripMenuItem.Name = "openExscudoRegistationWebsiteToolStripMenuItem";
-            this.openExscudoRegistationWebsiteToolStripMenuItem.Size = new System.Drawing.Size(365, 30);
+            this.openExscudoRegistationWebsiteToolStripMenuItem.Size = new System.Drawing.Size(405, 30);
             this.openExscudoRegistationWebsiteToolStripMenuItem.Text = "Open Exscudo registation website";
             this.openExscudoRegistationWebsiteToolStripMenuItem.Click += new System.EventHandler(this.OpenExscudoRegistationWebsiteToolStripMenuItem_Click);
             // 
@@ -1102,10 +1141,15 @@
             this.panel1.Size = new System.Drawing.Size(1549, 50);
             this.panel1.TabIndex = 14;
             // 
-            // olvColumn3
+            // createAccountBTN
             // 
-            this.olvColumn3.Text = "Balance";
-            this.olvColumn3.Width = 90;
+            this.createAccountBTN.Location = new System.Drawing.Point(356, 376);
+            this.createAccountBTN.Name = "createAccountBTN";
+            this.createAccountBTN.Size = new System.Drawing.Size(195, 33);
+            this.createAccountBTN.TabIndex = 25;
+            this.createAccountBTN.Text = "Create new account";
+            this.createAccountBTN.UseVisualStyleBackColor = true;
+            this.createAccountBTN.Click += new System.EventHandler(this.createAccountBTN_Click);
             // 
             // Form1
             // 
@@ -1128,7 +1172,7 @@
             this.tabControl1.ResumeLayout(false);
             this.walletTab.ResumeLayout(false);
             this.groupBox12.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.objectListView1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.accountLV)).EndInit();
             this.groupBox11.ResumeLayout(false);
             this.groupBox7.ResumeLayout(false);
             this.groupBox7.PerformLayout();
@@ -1142,6 +1186,8 @@
             this.groupBox8.PerformLayout();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
+            this.tranactionsTab.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.transactionLV)).EndInit();
             this.configTab.ResumeLayout(false);
             this.groupBox9.ResumeLayout(false);
             this.groupBox9.PerformLayout();
@@ -1156,8 +1202,6 @@
             this.groupBox3.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.rootIntervalNM)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.rootThreadsNM)).EndInit();
-            this.tranactionsTab.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.transactionLV)).EndInit();
             this.logTab.ResumeLayout(false);
             this.logTab.PerformLayout();
             this.menuStrip1.ResumeLayout(false);
@@ -1215,7 +1259,6 @@
         private System.Windows.Forms.ToolStripMenuItem importConfigjsonToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem cMDToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem eonCommandLineToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem opensslCommandLineToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exportConfigjsonToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem openWorkingFolderToolStripMenuItem;
         private System.Windows.Forms.Panel panel1;
@@ -1241,14 +1284,7 @@
         private System.Windows.Forms.TabPage logTab;
         private System.Windows.Forms.TextBox logTB;
         private BrightIdeasSoftware.ObjectListView transactionLV;
-        private BrightIdeasSoftware.OLVColumn typeColumn;
         private BrightIdeasSoftware.OLVColumn timestampColumn;
-        private BrightIdeasSoftware.OLVColumn deadlineColumn;
-        private BrightIdeasSoftware.OLVColumn feeColumn;
-        private BrightIdeasSoftware.OLVColumn senderColumn;
-        private BrightIdeasSoftware.OLVColumn signatureColumn;
-        private BrightIdeasSoftware.OLVColumn amountColumn;
-        private BrightIdeasSoftware.OLVColumn recipientColumn;
         private System.Windows.Forms.GroupBox groupBox9;
         private System.Windows.Forms.CheckBox logScrollCB;
         private System.Windows.Forms.ToolStripMenuItem openExscudoRegistationWebsiteToolStripMenuItem;
@@ -1259,10 +1295,20 @@
         private System.Windows.Forms.GroupBox groupBox10;
         private System.Windows.Forms.GroupBox groupBox11;
         private System.Windows.Forms.GroupBox groupBox12;
-        private BrightIdeasSoftware.ObjectListView objectListView1;
-        private BrightIdeasSoftware.OLVColumn olvColumn1;
+        private BrightIdeasSoftware.ObjectListView accountLV;
         private BrightIdeasSoftware.OLVColumn olvColumn2;
         private BrightIdeasSoftware.OLVColumn olvColumn3;
+        private BrightIdeasSoftware.OLVColumn olvColumn4;
+        private BrightIdeasSoftware.OLVColumn olvColumn1;
+        private System.Windows.Forms.CheckBox payoutRawCB;
+        private BrightIdeasSoftware.OLVColumn typeColumn;
+        private BrightIdeasSoftware.OLVColumn amountColumn;
+        private BrightIdeasSoftware.OLVColumn feeColumn;
+        private BrightIdeasSoftware.OLVColumn recipientColumn;
+        private BrightIdeasSoftware.OLVColumn signatureColumn;
+        private System.Windows.Forms.ToolStripMenuItem rebuildWorkingFoldersToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem resetAllConfigToolStripMenuItem;
+        private System.Windows.Forms.Button createAccountBTN;
     }
 }
 

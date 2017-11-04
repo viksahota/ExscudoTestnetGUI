@@ -1,0 +1,24 @@
+{
+	"threads": 2,
+	"coin": "eon",
+	"name": "main",
+
+	"upstreamCheckInterval": "5s",
+
+	"payouts": {
+		"enabled": true,
+		"interval": "120m",
+
+		"peer": "peer.testnet.eontechnology.org:9443",
+		"seed": "<SEED>",
+
+		"deadline": 60,
+		"fee": 10,
+
+		"raw": true,
+
+		"timeout": "10s",
+		"threshold": 500000000
+	}
+
+}

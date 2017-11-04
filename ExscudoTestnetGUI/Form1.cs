@@ -9,7 +9,9 @@ using System.Threading;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.Collections;
-
+using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
+using System.Linq;
 
 namespace ExscudoTestnetGUI
 {
@@ -17,11 +19,10 @@ namespace ExscudoTestnetGUI
     public partial class Form1 : Form
     {
 
-        //insantiate the master-config object - this is the active config
-        private configClass conf;
+        private int selectedWallet=0;
 
         //create wallet list and the wallet object for the main account. Additional accounts can be added
-        ArrayList WalletList = new ArrayList();
+        List<WalletClass> WalletList = new List<WalletClass>();
         WalletClass mainWallet = new WalletClass();
 
         // This delegates enable asynchronous calls to gui from other threads
@@ -29,13 +30,16 @@ namespace ExscudoTestnetGUI
         delegate void SetDebugClearCallback();
         delegate void SetLogCallback(string text);
         delegate void SetInfTextCallback(string text);
-        delegate void SetConfigUpdateCallback();
+        delegate void SetConfigUpdateCallback(int index);
         delegate void SetAccountInfoCallback(string infoResponse);
         delegate void SetBalanceUpdateCallback(string text);
         delegate void SetBalanceUpdate2Callback(string text);
         delegate void SetUpdateCommitedCallback(string text);
-        delegate void SetBackupRestoreCallback();
-        delegate void SetSyncGUIBalanceCallback(string balance, string deposit);
+        delegate void SetBackupRestoreCallback(int index);
+        delegate void SetSyncGUIBalancesCallback();
+        delegate void SetAccountCheckImportCreateCallback();
+        delegate void SetSelectedAccountCallback(int index);
+
 
 
         //trips once per start to dispaly a message in debugTB if the account looks like its not registered with exscudo
@@ -44,9 +48,10 @@ namespace ExscudoTestnetGUI
         //define a thread which will process away from form thread.
         Thread eonThread;
         bool eonThreadRun = true;
+        bool os64bit = false;
 
         string appPath = "";
-
+                
         public Form1()
         {
             InitializeComponent();
@@ -56,11 +61,21 @@ namespace ExscudoTestnetGUI
 
             appPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\ExscudoTestnetGUI";
 
+            os64bit = Environment.Is64BitOperatingSystem;
+
+            WalletList.Add(mainWallet);
+
+            //set the primary wallet as default selected
+            selectedWallet = 0;
+            
+
             //start the eon thread
             eonThread = new Thread(new ThreadStart(EonThreadStart));
+            eonThread.SetApartmentState(ApartmentState.STA);
             eonThread.Start();
 
         }
+
 
         static void Application_ThreadException(object sender, ThreadExceptionEventArgs e)
         {
@@ -83,39 +98,69 @@ namespace ExscudoTestnetGUI
             DebugLogMsg("~~ Application start ~~\r\n");
 
             Thread.Sleep(100);
-            DebugLogMsg("Working directory : " + Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\r\n");
+            DebugLogMsg("Working directory : " + appPath + "\r\n");
 
-            //init sequence
+
+            //set up the eon folders and wallets
             try
             {
-                CheckInstall();
+
+                if (SetupEonFolder(0))
+                {
+                    //try and load stored walletslist
+                    if (File.Exists(appPath + @"\wallets.json"))
+                    {
+                        WalletList = ReadFromJsonFile<List<WalletClass>>(appPath + @"\wallets.json");
+                       
+                    }
+
+                    //setup the main wallet
+                    SetupWallet(0);
+
+                    //setup folders for each attached account
+                    if (WalletList.Count>1)
+                    {
+                        for (int i=1; i < WalletList.Count ; i++)
+                        {
+                            SetupEonFolder(i);
+                            SetupWallet(i);
+                        }
+                    }
+
+
+                }
+
+                
             }
             catch (Exception ex)
             {
-                DebugLogMsg("Error during checkinstall :" + ex.Message + "\r\n");
+                DebugLogMsg("EonThread() exception during setup :" + ex.Message + "\r\n");
+
             }
+
+            
 
             Thread.Sleep(100);
             //execute eon and display version information 
-            string eontext = EonCMD("eon");
+            string eontext = EonCMD(0, "eon");
             if (eontext != "-1") InfoUpdate(eontext);
 
             //update config
-            UpdateConfigDisplay();
+            UpdateConfigDisplay(0);
 
             //get the account info and populate the GUI
-            string inftext = EonCMD("eon info");
+            string inftext = EonCMD(0, "eon info");
             if (inftext != "-1") UpdateAccountInfo(inftext);
 
-            //get the account balance and update display
-            string stateResponse = EonCMD("eon state");
-            if (stateResponse != "-1") UpdateBalance(stateResponse);
+            //get the account balances and update display
+            UpdateBalances();
 
-            #region  get the list of created accounts
+            //populate the account list & select the primary account
+            this.accountLV.SetObjects(WalletList);
+            SetSelectedAccount(0);
+            SyncGUIBalances();
+            
 
-            GetAttachedAccounts();
-
-            #endregion
 
             int counter = 0;
             DateTime lastBalancePollTime = DateTime.Now;
@@ -126,10 +171,10 @@ namespace ExscudoTestnetGUI
                 //every 5 seconds update the main account balance/deposit
                 //query EON
                 TimeSpan elapsed = DateTime.Now - lastBalancePollTime;
-                if (elapsed.Seconds >= 5)
+                if (elapsed.Seconds >= 10)
                 {
-                    stateResponse = EonCMD("eon state", false);
-                    if (stateResponse != "-1") UpdateBalance(stateResponse);
+                    if (eonThreadRun) UpdateBalances();
+                    if (eonThreadRun) SyncGUIBalances();
                     lastBalancePollTime = DateTime.Now;
 
                     counter++;
@@ -143,16 +188,14 @@ namespace ExscudoTestnetGUI
             }
         }
 
-        //seeks out the accounts that have been created by the master account by scanning the commit history
         private void GetAttachedAccounts()
         {
-            //we need to get the commit response and search for type 100 transactions
-            string commitResponse = EonCMD("eon commit " + accountTB.Text);
-            if (commitResponse != "-1") UpdateCommited(commitResponse);
+            AccountSeedDialog asDialog = new AccountSeedDialog();
 
-            commitClass oResp = new commitClass();
+            //we need to get the commit response and search for "New account" tranactions
+            string commitResponse = EonCMD(0, "eon allcommit " + accountTB.Text);
 
-            try
+            if (commitResponse != "-1")
             {
                 //locate the braces containing json response
                 int ind1 = commitResponse.IndexOf('{');
@@ -162,387 +205,657 @@ namespace ExscudoTestnetGUI
                 {
                     string jsonResponse = commitResponse.Substring(ind1, (ind2 - ind1 + 1));
 
+                    //output may be broken up through pagination of results introduced in eon 0.12. Try and remove <nil> seperators before deserialising..
+                    string pagePattern = @"}\s*]\s*}\s*<nil>\s*{\s*""all"":\s\[\s*{";
+                    jsonResponse = Regex.Replace(jsonResponse, pagePattern, "},\n{");
+
                     //deserialise the response
+                commitClass oResp = new commitClass();
                     oResp = JsonConvert.DeserializeObject<commitClass>(jsonResponse);
 
-                    for (int i = 0; i < oResp.All.Length; i++)
+                    //reverse the transactions order so we will locate the attached accounts in the created order
+                    Array.Reverse(oResp.All);
+                    
+
+                    foreach (commitClass.All2 m in oResp.All)
                     {
-                        //check for new account creation
-                        if (oResp.All[i].Type == 100)
+                        if (m.Type == 100)
                         {
-                            //get the transaction signature, we'll need it to manually pull the attachement data since we cant handle dynamic key in the attachment
-                            string targetSig = oResp.All[i].Signature;
+                            string newAccountAttachment = m.Attachment.ToString();
 
-                            //get the index of this signature in the commit response
-                            int sigIndex = commitResponse.IndexOf(targetSig);
+                            //attachment data needs to be extracted for this entry from the commit list, hunt the signature and get the attachement...
+                            string newAccountSig = m.Signature;
+                            string pattern = newAccountSig + @""",\s*""attachment"":\s*({\s*[^}]*\s})";
+                            Match transactionJsonMatch = Regex.Match(commitResponse, pattern);
+                            if (transactionJsonMatch.Groups.Count == 2)
+                            {
+                                //get the attachment, remove brackets and whitespace
+                                string transactionJson = transactionJsonMatch.Groups[1].ToString();
+                                transactionJson = transactionJson.Remove(0, 1);
+                                transactionJson = transactionJson.Remove(transactionJson.Length - 1, 1);
+                                transactionJson.Trim();
 
-                            //use regex to return the attached account ID and public key
-                            string pattern = @"""" + targetSig + @""",\s+""attachment"": {\s*""([^""]*)"":\s+""([^""]*)""\s*}";
-                            Match transactionMatch = Regex.Match(commitResponse, pattern);
+                                //get new account info
+                                string nPattern = @"""([^\s]*)"":\s""([^\s]*)""";
+                                Match newAccountMatch = Regex.Match(transactionJson, nPattern);
 
-                            DebugMsg("Attached account detected: " + transactionMatch.Groups[1] + " ( public-key: " + transactionMatch.Groups[2] + ")\r\n");
+                                string newAccountID = newAccountMatch.Groups[1].ToString();
+                                string pubKey = newAccountMatch.Groups[2].ToString();
+
+
+                                //scan if we already have this accountID in the walletList
+                                int matchVal = -1;
+                                for (int a = 0; a < WalletList.Count; a++)
+                                {
+                                    if (WalletList[a].AccountID == newAccountID) matchVal = a;
+                                }
+
+                                if (matchVal == -1)  //entry does not exist in walletlist, create it and ask for seed.
+                                {
+                                    //create a new wallet in our list
+                                    WalletClass wal = new WalletClass
+                                    {
+                                        AccountID = newAccountID
+                                    };
+                                    WalletList.Add(wal);
+
+                                    //request the private-key (SEED) for this account from the user
+                                    asDialog = new AccountSeedDialog();
+                                    asDialog.setAccountLabel(wal.AccountID);
+                                    asDialog.ShowDialog();
+
+                                    //if the seed and nickname were supplied, update the wallet class
+                                    if (asDialog.result == true)
+                                    {
+                                        //store the nickname and seed
+                                        WalletList[WalletList.Count - 1].Seed = asDialog.seedVal;
+                                        WalletList[WalletList.Count - 1].NickName = asDialog.nickName;
+                                        WalletList[WalletList.Count - 1].ConfigJson.Payouts.Seed = asDialog.seedVal;
+
+                                        //get the public key
+                                        string infoResponse = EonCMD(0, "eon info " + asDialog.seedVal);
+                                        Match infoMatch = Regex.Match(infoResponse, @"Seed:\s*(.*)\s*Account:\s*(.*)\s*Public key:\s*(.*)\s*end...");
+
+                                        if (infoMatch.Groups.Count == 4)
+                                        {
+                                            string pubkeyString = infoMatch.Groups[3].ToString();
+                                            WalletList[WalletList.Count - 1].PublicKey = pubkeyString;
+                                        }
+                                        else
+                                        {
+                                            DebugLogMsg("GetAttachedAccount() Error parsing 'eon info' response : " + infoResponse);
+                                        }
+                                    }
+                                    Thread.Sleep(1000);
+                                }
+
+                                else //entry already exists in the walletlist, just check in case we dont have the seed yet
+                                {
+                                    WalletList[matchVal].Seed = WalletList[matchVal].Seed.Trim();
+
+                                    //if the seed is not set, request it from the user
+                                    if (WalletList[matchVal].Seed.Length != 64)
+                                    {
+                                        asDialog = new AccountSeedDialog();
+                                        asDialog.setAccountLabel(newAccountID);
+                                        asDialog.ShowDialog();
+
+                                        //if the seed and nickname were supplied, update the wallet class
+                                        if (asDialog.result == true)
+                                        {
+                                            //store the nickname and seed
+                                            WalletList[WalletList.Count - 1].Seed = asDialog.seedVal;
+                                            WalletList[WalletList.Count - 1].NickName = asDialog.nickName;
+                                            WalletList[WalletList.Count - 1].ConfigJson.Payouts.Seed = asDialog.seedVal;
+                                            Thread.Sleep(1000);
+
+                                        }
+
+                                    }
+
+                                    //if the seed is ok , pass through....
+
+                                }
+
+
+                                //report the account in the view
+                                DebugMsg("Attached account detected: " + newAccountID + "\r\n");
+                            }
 
                         }
+
+                        
+
+
+                        
                     }
 
+                }
 
-                    //this.transactionLV.SetObjects(oResp.All);
-                }
-                else
-                {
-                    DebugMsg("Error checking tranactions, unexpected  commit response : " + commitResponse);
-                }
+
             }
-            catch (Exception ex)
-            {
-                DebugMsg("Exception in UpdateCommited() - " + ex.Message);
-                LogMsg("Exception in UpdateCommited() - " + ex.Message);
-            }
+
+
         }
 
-        //updates the gui balance and deposit. provide the response of 'eon state' (allows eon cmd to be run in another thread this way, callback to forms to update).
-        private void UpdateBalance(string stateResponse)
+        //tests the identified wallet to see if the account exists and is active. returns:  -1= does not exist or other fail ,   1= active  ,  2= exists but inactive
+        private int CheckAccountState(int index)
         {
+            int result = 0-1;
+
             try
             {
-                Match stateMatches = Regex.Match(stateResponse, @"{\s*""state"": {\s*""(.*)"":.(.*),\s*""(.*)"":.""(.*)""\s*},\s*""(.*)"":.(\d*),\s*""(.*)"":.(\d*)\s*}");
-
-                //if we have a valid match , extract the items into a stateResponse object
-                if (stateMatches.Groups.Count == 9)
+                string stateResponse = EonCMD(index, "eon state", true);
+                if (stateResponse != "-1")
                 {
-                    //recover the parameters
-                    int code = Convert.ToInt16(stateMatches.Groups[2].ToString());
 
-                    //if OK, update the GUI balance
-                    if (code == 200)
-                    {
-                        //update balance and deposit
-                        SyncGUIBalance(stateMatches.Groups[6].ToString(), stateMatches.Groups[8].ToString());
-                    }
-                    else if (code == 404)
-                    {
-                        SyncGUIBalance("404: Account not found", "404: Account not found");
+                    //Match stateMatches = Regex.Match(stateResponse, @"state:\s*(\d*).*\s*Amount:\s*(.*)\s*Deposit:\s*(.*)\s*end...");
 
-                        //display message for user to register this info with exscudo....
-                        if (!registerWarning)
+                    string pattern = @"""code"": (\d*),\s*""name"": ""([^""]*)""\s*},\s*""amount"": (\d*),\s*""deposit"": (\d*)\s*}";
+                    Match stateMatches = Regex.Match(stateResponse,pattern);
+                    
+
+                    //if we have a valid match , extract the items into a stateResponse object
+                    if (stateMatches.Groups.Count == 5)
+                    {
+                        //recover the parameters
+                        int code = Convert.ToInt16(stateMatches.Groups[1].ToString());
+
+                        //if OK, update the GUI balance
+                        if (code == 200)
                         {
+                            //account active
+                            result = 1;
+                        }
+                        else if (code == 404)
+                        {
+                            //account not active
+                            //display message for user to register this info with exscudo....
                             DebugMsg("~~~  Your account cannot be found. To register it with Exscudo you will need these details : ~~~\r\nYour email\r\nYour account ID : " + accountTB.Text + "\r\nYour public key : " + pubkeyTB.Text + "\r\n" + @"Register at :  https://testnet.eontechnology.org/" + "\r\n");
                             DebugMsg("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n");
-                            registerWarning = true;
+
+                            //exists, inactive
+                            result = 2;
+
                         }
                     }
+                    else
+                    {
+                        //does not exist, or other error
+                        result = 0;
+                        DebugLogMsg("CheckAccountState() - unexpected response : " + stateResponse);
+                        result = -1;
+                    }
                 }
-                else
-                {
-                    DebugLogMsg("UpdateBalance() - unexpected response : " + stateResponse);
-                }
+                //failed to get state response
+                else result = -1; 
             }
             catch (Exception ex)
             {
-                DebugLogMsg("Exception in UpdateBalance() - " + ex.Message);
+                DebugLogMsg("Exception in CheckAcountState() - " + ex.Message);
+                result = -1;
+            }
+
+            return result;
+        }
+
+        private void UpdateBalances()
+        {
+            for(int i=0; i<WalletList.Count; i++)
+            {
+                string stateResponse = EonCMD(i, "eon state",false);
+                if ((stateResponse != "-1")&&(eonThreadRun))
+                {
+                    try
+                    {
+                        //Match stateMatches = Regex.Match(stateResponse, @"state:\s*(\d*).*\s*Amount:\s*(.*)\s*Deposit:\s*(.*)\s*end...");
+                        string pattern = @"""code"": (\d*),\s*""name"": ""([^""]*)""\s*},\s*""amount"": (\d*),\s*""deposit"": (\d*)\s*}";
+                        Match stateMatches = Regex.Match(stateResponse, pattern);
+
+                        //if we have a valid match , extract the items into a stateResponse object
+                        if (stateMatches.Groups.Count == 5)
+                        {
+                            //recover the parameters
+                            int code = Convert.ToInt16(stateMatches.Groups[1].ToString());
+
+                            //if OK, update the walletlist balance
+                            if (code == 200)
+                            {
+                                //update wallet object
+                                WalletList[i].Balance = (Convert.ToDecimal(stateMatches.Groups[3].ToString()) / 1000000).ToString();
+                                WalletList[i].Deposit = (Convert.ToDecimal(stateMatches.Groups[4].ToString()) / 1000000).ToString();
+                            }
+                            else if (code == 404)
+                            {
+                                //Account not found
+                            }
+                        }
+                        else
+                        {
+                            //if we have a seed format error, trim the seed value
+                            if (stateResponse.Contains("Seed format error:"))
+                            {
+                                WalletList[i].Seed = WalletList[i].Seed.Trim();
+                                WalletList[i].ConfigJson.Payouts.Seed = WalletList[i].ConfigJson.Payouts.Seed.Trim();
+                                WalletList[i].PublicKey = WalletList[i].PublicKey.Trim();
+                                WalletList[i].AccountID = WalletList[i].AccountID.Trim();
+                                WriteConfig(i);
+                                SaveWalletList();
+                            }
+
+                            //else report it
+                            else DebugLogMsg("UpdateBalances(" + i + ") - unexpected response : " + stateResponse);
+                        }
+
+                    }
+                    catch (Exception ex)
+                    {
+                        DebugLogMsg("Exception in UpdateBalances(" + i + ") - " + ex.Message);
+                    }
+
+
+
+                }
+
             }
         }
 
-        //called by UpdateBalance() , does the final write to form components by invoking itself on the form thread
-        private void SyncGUIBalance(string balance, string deposit)
+     
+        //Updates the onscreen balances using the data in walletlist
+        private void SyncGUIBalances()
         {
             if (this.balanceLBL.InvokeRequired)
             {
-                SetSyncGUIBalanceCallback d = new SetSyncGUIBalanceCallback(SyncGUIBalance);
-                this.Invoke(d, new object[] { balance, deposit });
+                SetSyncGUIBalancesCallback d = new SetSyncGUIBalancesCallback(SyncGUIBalances);
+                this.Invoke(d, new object[] {  });
             }
             else
             {
                 //refresh if needed
-                if (balanceLBL.Text != balance) balanceLBL.Text = balance;
-                if (depositLBL.Text != deposit) depositLBL.Text = deposit;
+                if (balanceLBL.Text != WalletList[selectedWallet].Balance) balanceLBL.Text = WalletList[selectedWallet].Balance;
+                if (depositLBL.Text != WalletList[selectedWallet].Deposit) depositLBL.Text = WalletList[selectedWallet].Deposit;
+                if (rxAddressLBL.Text != WalletList[selectedWallet].AccountID) rxAddressLBL.Text = WalletList[selectedWallet].AccountID;
+                accountLV.BuildList(true);
+
             }
         }
 
-
-        private void CheckInstall()
-        {            
-            //check / create our application data folder in the users %APPDATA% folder
-            if (!Directory.Exists(appPath))
-            {
-                Directory.CreateDirectory(appPath);
-            }
-
-            //test if eon.exe exists in the local folder
-            if (File.Exists(appPath + @"\eon.cli.windows\eon.exe"))
-            {
-                //debugMsg("eon already present");
-
-            }
-            else
-            {
-                Thread.Sleep(100);
-                DebugMsg(">eon install not found - downloading....");
-
-                //try to delete the eon.cli.windows.zip file if it exists
-                try
-                {
-                    File.Delete(appPath + @"\eon.cli.windows.zip");
-                }
-                catch (Exception ex)
-                {
-                    DebugMsg("Error deleting eon zip - " + ex.Message);
-                    LogMsg("Error deleting eon zip - " + ex.Message);
-                }
-
-                //remove the eon.cli.windows directory if its present
-                try
-                {
-                    Directory.Delete(appPath + @"\eon.cli.windows");
-                }
-                catch (Exception ex)
-                {
-                    DebugMsg("Error deleting eon folder - " + ex.Message);
-                    LogMsg("Error deleting eon folder - " + ex.Message);
-                }
-
-                //download and unpack eon
-                try
-                {
-                    using (var client = new WebClient())
-                    {
-
-                        client.DownloadFile("https://testnet.eontechnology.org/client/eon.cli.windows.zip", appPath + @"\eon.cli.windows.zip");
-                        DebugMsg("OK\r\nUnpacking eon.cli.windows ....");
-                        Thread.Sleep(100);
-                    }
-
-                    try
-                    {
-                        //unpack the file
-                        ZipFile.ExtractToDirectory(appPath + @"\eon.cli.windows.zip", appPath + @"\eon.cli.windows");
-                        DebugMsg("OK\r\n");
-                        Thread.Sleep(100);
-                    }
-                    catch (Exception ex)
-                    {
-                        DebugMsg("Failed unpacking file" + ex.Message);
-                        Thread.Sleep(100);
-                    }
-
-                    //remove the zip
-                    //try to delete the eon.cli.windows.zip file if it exists
-                    try
-                    {
-                        File.Delete(appPath + @"\eon.cli.windows.zip");
-                    }
-                    catch (Exception ex)
-                    {
-                        DebugMsg("Error deleting eon zip - " + ex.Message);
-                        LogMsg("Error deleting eon zip - " + ex.Message);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    DebugMsg("failed to download eon.cli.windows.zip : " + ex.Message);
-                    Thread.Sleep(100);
-                }
-
-                DebugMsg(">OpenSSL - downloading....");
-                Thread.Sleep(100);
-
-                //try to delete the openssl zip file if it exists
-                try
-                {
-                    File.Delete(appPath + @"\openssl-0.9.8r-x64_86-win64-rev2.zip");
-                }
-                catch (Exception ex)
-                {
-                    DebugMsg("Error deleting openssl zip - " + ex.Message);
-                    LogMsg("Error deleting openssl zip - " + ex.Message);
-                }
-
-                //remove the openssl directory if its present
-                try
-                {
-                    Directory.Delete(appPath + @"\openssl-0.9.8r-x64_86-win64-rev2");
-                }
-                catch (Exception ex)
-                {
-                    DebugMsg("Error deleting openssl folder - " + ex.Message);
-                    LogMsg("Error deleting openssl folder - " + ex.Message);
-                }
-
-                //download and unpack openssl
-                try
-                {
-                    using (var client = new WebClient())
-                    {
-                        Thread.Sleep(100);
-                        client.DownloadFile("https://indy.fulgan.com/SSL/openssl-0.9.8r-x64_86-win64-rev2.zip", appPath + @"\openssl-0.9.8r-x64_86-win64-rev2.zip");
-                        DebugMsg("OK\r\nUnpacking openssl ....");
-                    }
-
-                    try
-                    {
-                        //unpack the file
-                        Thread.Sleep(100);
-                        ZipFile.ExtractToDirectory(appPath + @"\openssl-0.9.8r-x64_86-win64-rev2.zip", appPath);
-                        DebugMsg("OK\r\n");
-                    }
-                    catch (Exception ex)
-                    {
-                        DebugMsg("failed unpacking openssl : " + ex.Message);
-                        Thread.Sleep(100);
-                    }
-
-                    //try to delete the openssl zip file if it exists to tidy up
-                    try
-                    {
-                        File.Delete(appPath + @"\openssl-0.9.8r-x64_86-win64-rev2.zip");
-                    }
-                    catch (Exception ex)
-                    {
-                        DebugMsg("failed deleting openssl zip: " + ex.Message);
-                    }
-
-
-
-                }
-                catch (Exception ex)
-                {
-                    DebugMsg("failed to download openssl: " + ex.Message);
-                    Thread.Sleep(330);
-                }
-
-            }
-
-        
-    
-
-            //read the config.json file into the conf object
-            if (ReadConfig())
-            {
-                DebugMsg("config.json load OK\r\n\r\n");
-            }
-
-            //if the seed value is empty , generate one
-            if (conf.Payouts.Seed == "<SEED>")
-            {
-                //create the seed hex using openssl
-                DebugMsg("Generating new seed key and upating config...");
-                Directory.SetCurrentDirectory(appPath + @"\openssl-0.9.8r-x64_86-win64-rev2");
-                string hexString = ExecuteCommandSync(@"openssl rand -hex 32");
-                Directory.SetCurrentDirectory(appPath);
-                hexString = hexString.Trim();
-                conf.Payouts.Seed = hexString;
-                WriteConfig();
-                DebugMsg("OK\r\n(Seed Hex: " + hexString + ")\r\n\r\n");
-
-                string infoResponse = EonCMD("eon info");
-                Match infoMatch = Regex.Match(infoResponse, @"Seed:\s*(.*)\s*Account:\s*(.*)\s*Public key:\s*(.*)\s*end...");
-
-                if (infoMatch.Groups.Count == 4)
-                {
-                    //string seedString = infoMatch.Groups[1].ToString();
-                    string accountString = infoMatch.Groups[2].ToString();
-                    string pubkeyString = infoMatch.Groups[3].ToString();
-
-                    //display message for user to register this info with exscudo....
-                    DebugMsg("~~~  New account has been created - register it with Exscudo. You will need these details : ~~~\r\nYour email\r\nYour account ID : " + accountString + "\r\nYour public key : " + pubkeyString + "\r\n" + @"Register at :  https://testnet.eontechnology.org/" + "\r\n");
-                    DebugMsg("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n");
-                }
-                else
-                {
-                    DebugLogMsg("UpdateAccountInfo() - Error parsing info response : " + infoResponse);
-                }
-
-/*
-                int accInd1 = res.LastIndexOf("Account:") + 10;
-                int accInd2 = res.IndexOf(" ", accInd1);
-                string accountString = res.Substring(accInd1, accInd2 - accInd1);
-                accountString = accountString.Trim();
-                //debugMsg("Account ID : " + accountString + "\r\n");
-
-                int pubkeyInd1 = res.LastIndexOf("key:") + 6;
-                int pubkeyInd2 = res.IndexOf("\r\n", pubkeyInd1);
-                string pubkeyString = res.Substring(pubkeyInd1, pubkeyInd2 - pubkeyInd1);
-                //debugMsg("Public key : " + pubkeyString + "\r\n");
-                */
-                
-
-                BackupRestore();
-                
-                    //we've shown the message once, its enough.  supress further.
-                    registerWarning = true;
-
-            }
-
-        }
-
-        private void BackupRestore()
+        //sets the selected account index, needs to be set to primary on startup, as default.
+        private void SetSelectedAccount(int index)
         {
-            if (accountTB.InvokeRequired)
+            if (this.balanceLBL.InvokeRequired)
             {
-                SetBackupRestoreCallback d = new SetBackupRestoreCallback(BackupRestore);
-                this.Invoke(d, new object[] {});
+                SetSelectedAccountCallback d = new SetSelectedAccountCallback(SetSelectedAccount);
+                this.Invoke(d, new object[] { index });
             }
             else
             {
-                //present a dialog offering to import an existing json.conf , or export the new one for safekeeping (it will be deleted each time application updates)
-                //MessageBox.Show();
-                DialogResult queryRes1;
-                using (DialogCenteringService centeringService = new DialogCenteringService(this)) // center message box
-                {
-                    queryRes1 = MessageBox.Show("New account created - it will need registering with Exscudo\r\nCheck the debug view for details then use the menu shortcut to reach the registration page\r\n\r\nIts recommended to save your new config.json somewhere safe since it will be deleted each time the application updates. (you can restore it by importing your backup).\r\n\r\nBackup your new config.json now ?", "New account", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                }
-
-                if (queryRes1 == DialogResult.Yes)
-                {
-                    //backup the new config.json
-                    //export the json file somewhere.
-                    SaveFileDialog jsonDG = new SaveFileDialog
-                    {
-                        Filter = "json files (*.json)|*.json",
-                        FilterIndex = 1,
-                        RestoreDirectory = true
-                    };
-
-                    try
-                    {
-                        if (jsonDG.ShowDialog() == DialogResult.OK)
-                        {
-
-                            string filename = jsonDG.FileName;
-
-                            string jsonData = JsonConvert.SerializeObject(conf);
-                            File.WriteAllText(filename, jsonData);
-                            DebugMsg("File export OK\r\n");
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        DebugMsg("Error exporting config file  : " + ex.Message + "\r\n");
-                    }
-
-                }
-                else
-                {
-                    //offer to import an existing .json
-                    DialogResult queryRes2;
-                    using (DialogCenteringService centeringService = new DialogCenteringService(this)) // center message box
-                    {
-                        queryRes2 = MessageBox.Show("Import an existing account (config.json) ?", "Account import", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                    }
-
-                    if (queryRes2 == DialogResult.Yes)
-                    {
-                        ImportJson();
-                    }
-                    else
-                    {
-
-                    }
-                }
-
+                    selectedWallet = index;
+                    accountLV.SelectedIndex = index;
+                    accountLV.UnfocusedHighlightBackgroundColor = System.Drawing.Color.BlanchedAlmond;
+                    accountLV.Update();
+                    UpdateConfigDisplay(selectedWallet);
 
             }
         }
+
+        //checks if the identified eon instance is already set up, sets up if neccesary.  Allows to prepare multiple directories for multiple wallets.
+        //wallet0 is the main wallet.
+        private bool SetupEonFolder(int instance)
+        {
+
+            int cstate = 0;
+
+            while ((cstate != 3) && (cstate != 99))
+            {
+                switch (cstate)
+                {
+                    case (0):
+                        try
+                        {
+                            //check if specicifed eon dir exists , create if necc.
+                            if (Directory.Exists(appPath + @"\eon" + instance.ToString()))
+                            {
+                                if (File.Exists(appPath + @"\eon" + instance.ToString() + @"\eon.exe"))
+                                {
+                                    cstate = 3;
+                                }
+                                else
+                                {
+                                    cstate = 2;
+                                }
+
+                            }
+                            else
+                            {
+                                cstate = 1;
+                            }
+                        }
+                        catch(Exception ex)
+                        {
+                            DebugLogMsg("SetupEonInstance(" + instance.ToString() + ") state0 exception : " + ex.Message);
+                            cstate = 99;
+                        }
+                        break;
+
+                    case (1):
+                        try
+                        {
+                            Directory.CreateDirectory(appPath + @"\eon" + instance.ToString());
+                            cstate = 2;
+                        }
+                        catch(Exception ex)
+                        {
+                            DebugLogMsg("SetupEonInstance(" + instance.ToString() + ") state1 exception : " + ex.Message);
+                            cstate = 99;
+                        }
+                        break;
+
+                    case (2):
+                        try
+                        {
+                            //deploy eon client
+                            if (os64bit)
+                            {
+                                File.WriteAllBytes(appPath + @"\eon" + instance.ToString() + @"\eon.exe", ExscudoTestnetGUI.Properties.Resources.eon64);
+                                if (instance == 0) DebugLogMsg("eon (x64) deployed\r\n");
+                            }
+                            else
+                            {
+                                File.WriteAllBytes(appPath + @"\eon" + instance.ToString() + @"\eon.exe", ExscudoTestnetGUI.Properties.Resources.eon32);
+                                if (instance == 0) DebugLogMsg("eon (x32) deployed\r\n");
+                            }
+
+                            File.WriteAllText(appPath + @"\eon" + instance.ToString() + @"\config.json", ExscudoTestnetGUI.Properties.Resources.config);
+                            File.WriteAllText(appPath + @"\eon" + instance.ToString() + @"\Readme.md", ExscudoTestnetGUI.Properties.Resources.ReadMe);
+
+                            DebugMsg("Checking in case antivirus software removes eon.exe ...");
+                            int i = 4;
+                            while (i > 0)
+                            {
+                                DebugMsg(i.ToString() + "...");
+                                Thread.Sleep(1000);
+                                i--;
+                            }
+                            DebugMsg("\r\n");
+
+                            //test eon.exe
+                            if (File.Exists(appPath + @"\eon" + instance.ToString() + @"\eon.exe"))
+                            {
+                                cstate = 3;
+                                DebugMsg("eon OK\r\n");
+                            }
+                            else
+                            {
+                                MessageBox.Show(@"\eon" + instance.ToString() + @"\eon.exe" + " is missing, this can occur since some antivirus tools can\r\nidentify eon.exe as a virus and quarantine it\r\nPlease check you antivirus quarantine, restore eon.exe, and restart this application");
+                                DebugLogMsg("SetupEonInstance() : eon.exe is missing, removed by antivirus?\r\n");
+                                cstate = 99;
+                            }
+
+                        }
+                        catch (Exception ex)
+                        {
+                            DebugLogMsg("SetupEonInstance(" + instance.ToString() + ") state2 exception : " + ex.Message);
+                            cstate = 99;
+                        }
+
+
+                        break;
+
+                    case (3):
+                        //success
+                        break;
+
+                    case (99):
+                        //fail
+                        break;
+                }
+            }
+
+            if (cstate == 3) return true;
+            else if (cstate == 99) return false;
+            else return false;
+        }
+
+        private bool SaveWalletList()
+        {
+            bool res = false;
+            try
+            {
+                WriteToJsonFile(appPath + @"\wallets.json", WalletList, false);
+                res = true;
+            }
+            catch (Exception ex)
+            {
+                DebugLogMsg("SaveWalletList() Exception saving wallets.json : " + ex.Message);
+                res = false;
+            }
+            return (res);
+        }
+
+
+        private bool SetupWallet(int walletIndex)
+        {
+            int cstate = 0;
+            SetupWalletDialog swDialog = new SetupWalletDialog();
+
+
+            while ((cstate != 9)&&(cstate != 99))
+            {
+                switch (cstate)
+                {
+                    case (0):
+                        //check if there is an entry in WalletList for the requested instance
+                        if ((walletIndex + 1) <= WalletList.Count)
+                        {
+                            WalletList[walletIndex].Seed = WalletList[walletIndex].Seed.Trim();
+                            WalletList[walletIndex].PublicKey = WalletList[walletIndex].PublicKey.Trim();
+                            WalletList[walletIndex].AccountID = WalletList[walletIndex].AccountID.Trim();
+
+                            //check if SEED is not yet set for this account
+                            if (WalletList[walletIndex].Seed.Length != 64)
+                            {
+                                cstate = 1;
+                            }
+                            else
+                            {
+                                cstate = 6;
+                            }
+
+                        }
+                        break;
+
+                    case (1):
+
+                        //show dialog to either create a new account, import a config.json, or paste a SEED
+
+                        swDialog.ShowDialog();
+                        //swDialog.Show();
+
+                        if (swDialog.result == "Create") cstate = 4;
+                        else if (swDialog.result == "Import") cstate = 2;
+                        else if (swDialog.result == "Set") cstate = 3;
+                        else if (swDialog.result == "Cancel") cstate = 99;
+
+                        break;
+
+                    case (2):
+                        if (ImportJsonDLG(walletIndex))
+                        {
+                           WalletList[walletIndex].Seed = WalletList[walletIndex].ConfigJson.Payouts.Seed;
+                            cstate = 5;
+                        }
+                        //if it fails, return to selection
+                        else cstate = 2;
+
+                        break;
+
+                    case (3):
+
+                        //set the pasted SEED value ----------------------------------
+
+                        try
+                        {
+                            //read the config file into the wallet list
+                            ReadConfigObject(walletIndex);
+
+                            //adjust the SEED
+                            WalletList[walletIndex].Seed = swDialog.seedVal;
+                            WalletList[walletIndex].ConfigJson.Payouts.Seed = swDialog.seedVal;
+
+                            //write the new config back to the config.json file
+                            WriteConfig(walletIndex);
+                            SaveWalletList();
+                            cstate = 5;
+                        }
+                        catch (Exception ex)
+                        {
+                            DebugLogMsg("SetupWallet() state3 exception : " + ex.Message);
+                            cstate = 99;
+                        }
+
+                        break;
+
+                    case (4):
+
+                        //create a new SEED
+                        string seedResponse = EonCMD(0, "eon seed");
+                        DebugLogMsg(seedResponse);
+                        string pattern = @"Seed:\s*(.*)\s*Account:\s*(.*)\s*Public key:\s*(.*)";
+                        Match srMatch = Regex.Match(seedResponse, pattern);
+
+
+                        string seed = srMatch.Groups[1].ToString();
+                        string accountID = srMatch.Groups[2].ToString();
+                        string publicKey = srMatch.Groups[3].ToString();
+
+                        //register this new account (if its not primary)
+                        if (walletIndex != 0)
+                        {
+                            string createResponse = EonCMD(0, "eon new_account " + publicKey);
+                            DebugLogMsg(createResponse);
+                            string pattern2 = @"send transaction.*<<\s*""(.*)""";
+                            Match crMatch = Regex.Match(createResponse, pattern2);
+                            string createResult = crMatch.Groups[1].ToString();
+
+
+                            if (createResult == "success")
+                            {
+                                //new account has been created.  update the walletlist item and the config file
+                                ReadConfigObject(walletIndex);
+                                WalletList[walletIndex].Seed = seed;
+                                WalletList[walletIndex].AccountID = accountID;
+                                WalletList[walletIndex].PublicKey = publicKey;
+                                if (walletIndex == 0) WalletList[walletIndex].NickName = "";
+                                WalletList[walletIndex].ConfigJson.Payouts.Seed = seed;
+                                WriteConfig(walletIndex);
+                                SaveWalletList();
+
+                                cstate = 6;
+
+
+                            }
+                            else cstate = 99;
+                        }
+                        else
+                        {
+                            //its the primary wallet -- display a notification
+                            //display message for user to register this info with exscudo....
+
+
+                            ReadConfigObject(walletIndex);
+                            WalletList[walletIndex].Seed = seed;
+                            WalletList[walletIndex].AccountID = accountID;
+                            WalletList[walletIndex].PublicKey = publicKey;
+                            if (walletIndex == 0) WalletList[walletIndex].NickName = "Primary";
+                            WalletList[walletIndex].ConfigJson.Payouts.Seed = seed;
+                            WriteConfig(walletIndex);
+                            SaveWalletList();
+
+                            DebugLogMsg("~~~  New account has been created - register it with Exscudo. You will need these details : ~~~\r\nYour email\r\nYour account ID : " + accountID + "\r\nYour public key : " + publicKey + "\r\n" + @"Register at :  https://testnet.eontechnology.org/" + "\r\n");
+                            DebugLogMsg("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n");
+
+                            MessageBox.Show("New account has been created but needs registering with Exscudo. Check the debug log for details.\r\nOnce you've registered, restart this application");
+
+                            cstate = 6;
+                        }
+
+                        break;
+
+
+                    case (5):
+                        //get wallet info from imported/pasted seed and populate the wallet object / walletlist
+                        string infoResponse = EonCMD(walletIndex, "eon info");
+                        Match infoMatch = Regex.Match(infoResponse, @"Seed:\s*(.*)\s*Account:\s*(.*)\s*Public key:\s*(.*)\s*end...");
+
+                        if (infoMatch.Groups.Count == 4)
+                        {
+                            string seedString = infoMatch.Groups[1].ToString();
+                            string accountString = infoMatch.Groups[2].ToString();
+                            string pubkeyString = infoMatch.Groups[3].ToString();
+
+                            WalletList[walletIndex].AccountID = accountString;
+                            WalletList[walletIndex].PublicKey = pubkeyString;
+                            if (walletIndex == 0) WalletList[walletIndex].NickName = "Primary";
+
+                            cstate = 0;
+                            
+                        }
+                        else
+                        {
+                            DebugLogMsg("SetupWallet() state5 - Error parsing info response : " + infoResponse);
+                            cstate = 99;
+                        }
+
+
+                        break;
+
+                    case (6):
+
+                        //check if account is active?
+                        WriteConfig(walletIndex);
+                        int checkResult = CheckAccountState(walletIndex);
+
+                        if (checkResult == 1) cstate = 7;
+                        else if (checkResult == -1) cstate = 99;
+                        else if (checkResult == 2) cstate = 8;  //store and finish if its unregistered
+
+
+                        break;
+
+                    case (7):
+                        //check if primary account, if so get the attached accounts and update walletList
+                        if (walletIndex == 0)
+                        {
+                            //find the attached accounts and populate walletlist with accountID & public key
+                            GetAttachedAccounts();
+                            cstate = 8;
+                        }
+                        else cstate = 8;
+
+                        break;
+
+                    case (8):
+                        //write out the config file and store walletList to json file
+                        WriteConfig(walletIndex);
+                        SaveWalletList();
+                        cstate = 9;
+
+                        break;
+
+                    case (9):
+                        //success
+                        break;
+
+                    case (99):
+                        //fail
+                        break;
+                }
+            }
+
+            return false;
+        }
+
 
         //updates the GUI account information fields. takes the 'eon info' response as its input and invokes itself on form thread
         private void UpdateAccountInfo(string infoResponse)
@@ -560,9 +873,12 @@ namespace ExscudoTestnetGUI
 
                     if(infoMatch.Groups.Count==4)
                     {
-                        accountTB.Text = infoMatch.Groups[2].ToString();
-                        rxAddressLBL.Text = infoMatch.Groups[2].ToString();
-                        pubkeyTB.Text = infoMatch.Groups[3].ToString();
+                        mainWallet.Seed = infoMatch.Groups[1].ToString();
+                        mainWallet.AccountID = infoMatch.Groups[2].ToString();
+                        mainWallet.PublicKey = infoMatch.Groups[3].ToString();
+                        accountTB.Text = mainWallet.AccountID;
+                        rxAddressLBL.Text = mainWallet.AccountID;
+                        pubkeyTB.Text = mainWallet.PublicKey;
                     }
                     else
                     {
@@ -588,23 +904,71 @@ namespace ExscudoTestnetGUI
             {
                 try
                 {
-                    //locate the braces containing json response
-                    int ind1 = commitResponse.IndexOf('{');
-                    int ind2 = commitResponse.LastIndexOf('}');
 
-                    if ((ind1 != -1) && (ind2 != -1) && (!commitResponse.Contains("null")) && (commitResponse != "-1"))
+                    if (commitResponse != "-1")
                     {
-                        string jsonResponse = commitResponse.Substring(ind1, (ind2 - ind1 + 1));
+                        //locate the braces containing json response
+                        int ind1 = commitResponse.IndexOf('{');
+                        int ind2 = commitResponse.LastIndexOf('}');
 
-                        //deserialise the response
-                        commitClass oResp = new commitClass();
-                        oResp = JsonConvert.DeserializeObject<commitClass>(jsonResponse);
+                        if ((ind1 != -1) && (ind2 != -1) && (!commitResponse.Contains("null")) && (commitResponse != "-1"))
+                        {
+                            string jsonResponse = commitResponse.Substring(ind1, (ind2 - ind1 + 1));
 
-                        this.transactionLV.SetObjects(oResp.All);
-                    }
-                    else
-                    {
-                        DebugMsg("Error checking tranactions, unexpected  commit response : " + commitResponse);
+                            //output may be broken up through pagination of results introduced in eon 0.12. Try and remove <nil> seperators before deserialising..
+                            string pagePattern = @"}\s*]\s*}\s*<nil>\s*{\s*""all"":\s\[\s*{";
+                            jsonResponse = Regex.Replace(jsonResponse, pagePattern, "},\n{");
+
+                            //deserialise the response
+                            commitClass oResp = new commitClass();
+                            oResp = JsonConvert.DeserializeObject<commitClass>(jsonResponse);
+
+                            
+                            //Alter for better output in listview - convert the UNIX timestamp , convert amounts to EON , generate verbose transaction type 
+                            foreach(commitClass.All2 transaction in oResp.All)
+                            {
+                                var dateTimeOffset = DateTimeOffset.FromUnixTimeSeconds((long)transaction.Timestamp);
+                                DateTime dateTime = dateTimeOffset.DateTime;
+                                transaction.Attachment.Amount = transaction.Attachment.Amount / 1000000;
+
+                                switch(transaction.Type)
+                                {
+                                    case (100):
+                                        transaction.TypeString = "New Account";
+                                        break;
+
+                                    case (200):
+                                        transaction.TypeString = "Payment";
+                                        break;
+                                    case (310):
+                                        transaction.TypeString = "Refill";
+                                        break;
+
+                                    case (320):
+                                        transaction.TypeString = "Withdraw";
+                                        break;
+
+                                    default:
+                                        transaction.TypeString = transaction.Type.ToString();
+                                        break;
+
+                                }
+
+                                //TimeSpan ts = TimeSpan.FromSeconds(transaction.Timestamp);
+                                //DateTime localDateTime = new DateTime(ts.Ticks).ToLocalTime();
+                                transaction.TimestampString = dateTime.ToShortTimeString() + "  " + dateTime.ToShortDateString();
+                                
+                            }
+
+
+
+
+                            this.transactionLV.SetObjects(oResp.All);
+                        }
+                        else
+                        {
+                            DebugMsg("Error checking tranactions, unexpected  commit response : " + commitResponse);
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -618,29 +982,29 @@ namespace ExscudoTestnetGUI
             }
         }
         
-        private void UpdateConfigDisplay()
+        private void UpdateConfigDisplay(int index)
         {
             if (this.rootThreadsNM.InvokeRequired)
             {
                 SetConfigUpdateCallback d = new SetConfigUpdateCallback(UpdateConfigDisplay);
-                this.Invoke(d, new object[] { });
+                this.Invoke(d, new object[] { index });
             }
             else
             {
                 try
                 {
-                    rootThreadsNM.Value = conf.Threads;
-                    rootCoinTB.Text = conf.Coin;
-                    rootNameTB.Text = conf.Name;
+                    rootThreadsNM.Value = WalletList[index].ConfigJson.Threads;
+                    rootCoinTB.Text = WalletList[index].ConfigJson.Coin;
+                    rootNameTB.Text = WalletList[index].ConfigJson.Name;
 
                     //remove the s from the interval and convert to int
-                    string intString = conf.UpstreamCheckInterval;
+                    string intString = WalletList[index].ConfigJson.UpstreamCheckInterval;
                     intString = intString.Remove(intString.Length - 1, 1);
                     //int interval = intString;
                     int interval = Convert.ToInt16(intString);
                     rootIntervalNM.Value = interval;
                     //update the payouts enable checkbox
-                    if (conf.Payouts.Enabled)
+                    if (WalletList[index].ConfigJson.Payouts.Enabled)
                     {
                         payoutEnabledCB.Checked = true;
                     }
@@ -650,26 +1014,36 @@ namespace ExscudoTestnetGUI
                     }
 
                     //remove the m from the interval and convert to int
-                    string intString2 = conf.Payouts.Interval;
+                    string intString2 = WalletList[index].ConfigJson.Payouts.Interval;
                     intString2 = intString2.Remove(intString2.Length - 1, 1);
                     int interval2 = Convert.ToInt16(intString2);
                     payoutIntervalNM.Value = interval2;
 
-                    payoutPeerTB.Text = conf.Payouts.Peer;
+                    payoutPeerTB.Text = WalletList[index].ConfigJson.Payouts.Peer;
 
-                    payoutSeedTB.Text = conf.Payouts.Seed;
+                    payoutSeedTB.Text = WalletList[index].ConfigJson.Payouts.Seed;
 
-                    payoutDeadlineNM.Value = conf.Payouts.Deadline;
+                    payoutDeadlineNM.Value = WalletList[index].ConfigJson.Payouts.Deadline;
 
-                    payoutFeeNM.Value = conf.Payouts.Fee;
+                    payoutFeeNM.Value = WalletList[index].ConfigJson.Payouts.Fee;
+
+                    //update the payouts Raw checkbox
+                    if (WalletList[index].ConfigJson.Payouts.Raw)
+                    {
+                        payoutRawCB.Checked = true;
+                    }
+                    else
+                    {
+                        payoutRawCB.Checked = false;
+                    }
 
                     //remove the s from the timeout and convert to int
-                    string intString3 = conf.Payouts.Timeout;
+                    string intString3 = WalletList[index].ConfigJson.Payouts.Timeout;
                     intString3 = intString3.Remove(intString3.Length - 1, 1);
                     int timeoutVal = Convert.ToInt16(intString3);
                     payoutTimeoutNM.Value = timeoutVal;
-
-                    payoutThresholdNM.Value = conf.Payouts.Threshold;
+                    
+                    payoutThresholdNM.Value = WalletList[index].ConfigJson.Payouts.Threshold;
                 }
                 catch(Exception ex)
                 {
@@ -680,22 +1054,26 @@ namespace ExscudoTestnetGUI
 
         }
 
+
+   // ------------------------------------------------------------------------------------- needs updating for multi - wallet !!!!!!!!!!!!!!!!!!!!!!!
         private void WriteConfigBTN_Click(object sender, EventArgs e)
         {
-            conf.Threads = (byte)rootThreadsNM.Value;
-            conf.Coin = rootCoinTB.Text;
-            conf.Name = rootNameTB.Text;
-            conf.UpstreamCheckInterval = rootIntervalNM.Value.ToString() + "s";
-            conf.Payouts.Enabled = payoutEnabledCB.Checked;
-            conf.Payouts.Interval = payoutIntervalNM.Value.ToString() + "m";
-            conf.Payouts.Peer = payoutPeerTB.Text;
-            conf.Payouts.Seed = payoutSeedTB.Text;
-            conf.Payouts.Deadline = (uint)payoutDeadlineNM.Value;
-            conf.Payouts.Fee = (uint)payoutFeeNM.Value;
-            conf.Payouts.Timeout = payoutTimeoutNM.Value.ToString() + "s";
-            conf.Payouts.Threshold = (uint)payoutThresholdNM.Value;
+            WalletList[selectedWallet].ConfigJson.Threads = (byte)rootThreadsNM.Value;
+            WalletList[selectedWallet].ConfigJson.Coin = rootCoinTB.Text;
+            WalletList[selectedWallet].ConfigJson.Name = rootNameTB.Text;
+            WalletList[selectedWallet].ConfigJson.UpstreamCheckInterval = rootIntervalNM.Value.ToString() + "s";
+            WalletList[selectedWallet].ConfigJson.Payouts.Enabled = payoutEnabledCB.Checked;
+            WalletList[selectedWallet].ConfigJson.Payouts.Interval = payoutIntervalNM.Value.ToString() + "m";
+            WalletList[selectedWallet].ConfigJson.Payouts.Peer = payoutPeerTB.Text;
+            WalletList[selectedWallet].ConfigJson.Payouts.Seed = payoutSeedTB.Text;
+            WalletList[selectedWallet].ConfigJson.Payouts.Deadline = (uint)payoutDeadlineNM.Value;
+            WalletList[selectedWallet].ConfigJson.Payouts.Fee = (uint)payoutFeeNM.Value;
+            WalletList[selectedWallet].ConfigJson.Payouts.Raw = payoutRawCB.Checked;
+            WalletList[selectedWallet].ConfigJson.Payouts.Timeout = payoutTimeoutNM.Value.ToString() + "s";
+            WalletList[selectedWallet].ConfigJson.Payouts.Threshold = (uint)payoutThresholdNM.Value;
+            WriteConfig(selectedWallet);
 
-            WriteConfig();
+            SaveWalletList();
 
             DebugMsg("config.json updated\r\n");
         }
@@ -804,31 +1182,20 @@ namespace ExscudoTestnetGUI
             }
         }
 
-        private bool ReadConfig()
-        {
-            bool res = false;
-            conf = new configClass();
 
+
+        //writes config data from walletlist index to corresponding eon folder
+        private void WriteConfig(int index)
+        {
             try
             {
-                string configString = File.ReadAllText(appPath + @"\eon.cli.windows\config.json");
-
-                conf = JsonConvert.DeserializeObject<configClass>(configString);
-
-                res = true;
+                string jsonData = JsonConvert.SerializeObject(WalletList[index].ConfigJson);
+                File.WriteAllText(appPath + @"\eon" + index.ToString() + @"\config.json", jsonData);
             }
             catch(Exception ex)
             {
-                res = false;
-                DebugMsg("Failed opening/reading config :" + ex.Message);
+                DebugLogMsg("WriteConfig(" + index.ToString() + ") exception : " + ex.Message);
             }
-            return (res);
-        }
-
-        private void WriteConfig()
-        {
-            string jsonData = JsonConvert.SerializeObject(conf);
-            File.WriteAllText(appPath + @"\eon.cli.windows\config.json", jsonData);
         }
 
         // returns the raw cmds response, or -1 for failure
@@ -876,34 +1243,35 @@ namespace ExscudoTestnetGUI
         }
  
         //return the raw command response , or -1 for fail. Wraps ExecuteCommandSync to allow exec in eon folder
-        private string EonCMD(string cmd, bool enableLog)
+        private string EonCMD(int index, string cmd, bool enableLog)
         {
             string res = "-1";
 
             try
             {
-                Directory.SetCurrentDirectory(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + @"\eon.cli.windows");
+                Directory.SetCurrentDirectory(Path.GetDirectoryName(appPath + @"\eon" + index + @"\"));
                 res = ExecuteCommandSync(cmd);
-                Directory.SetCurrentDirectory(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
+                Directory.SetCurrentDirectory(appPath);
                 if (enableLog) LogMsg(res + "\r\n");
             }
             catch (Exception ex)
             {
-                DebugMsg("ERROR during EON command execution :\r\nCMD: " + cmd + "\r\n\r\nException: " + ex.Message);
+                DebugLogMsg("ERROR during EON command execution (walletIndex" + index.ToString() + ") :\r\nCMD: " + cmd + "\r\n\r\nException: " + ex.Message);
                 res = "-1";
             }
                 return (res);
         }
 
-        private string EonCMD(string cmd)
+        private string EonCMD(int index, string cmd)
         {
-            return(EonCMD(cmd, true));
+            return(EonCMD(index, cmd, true));
         }
+
+
 
         private void CommitBTN_Click(object sender, EventArgs e)
         {
-            string commitResponse = EonCMD("eon commit " + accountTB.Text);
-            //string commitResponse = EonCMD("eon commit " + "EON-R6RKE-PU4QA-V3DSP");
+            string commitResponse = EonCMD(selectedWallet, "eon allcommit " + accountTB.Text);
             if (commitResponse!="-1") UpdateCommited(commitResponse);           
         }
 
@@ -924,7 +1292,7 @@ namespace ExscudoTestnetGUI
             //launch eon command line
             try
             {
-                Directory.SetCurrentDirectory(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + @"\eon.cli.windows");
+                Directory.SetCurrentDirectory(appPath + @"\eon" + selectedWallet);
                 Process.Start("cmd.exe", "/k");
                 Directory.SetCurrentDirectory(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
             }
@@ -953,8 +1321,96 @@ namespace ExscudoTestnetGUI
             }
         }
 
-        private void ImportJson()
+        //read a specific config.json file into the corresponding eon wallet 
+        private bool ReadConfigObject(int index)
         {
+            bool res = false;
+
+            try
+            {
+                string filename = appPath + @"\eon" + index.ToString() + @"\config.json";
+                string newJSON = File.ReadAllText(filename);
+                configClass thisConf = new configClass();
+
+                try
+                {
+                    thisConf = JsonConvert.DeserializeObject<configClass>(newJSON);
+                }
+                catch (Exception ex)
+                {
+                    DebugMsg("Error deserializing json file - bad format? : " + ex.Message);
+                    return false;
+                }
+                               
+                //save this config object in the walletlist & create the config file
+                WalletList[index].ConfigJson = thisConf;
+
+                DebugMsg("config.json read OK\r\n");
+                res = true;
+
+            }
+            catch (Exception ex)
+            {
+                DebugMsg("Error: Could not read file. [ " + ex.Message + "]");
+                res = false;
+            }
+
+            return res;
+
+        }
+       
+
+        private bool ImportWalletsJson()
+        {
+            bool res = false;
+
+            //import a json file, overwrites existing one
+            OpenFileDialog importDG = new OpenFileDialog
+            {
+                InitialDirectory = "c:\\",
+                Filter = "wallets.json files (*.json)|*.json",
+                FilterIndex = 1,
+                RestoreDirectory = true
+            };
+
+            if (importDG.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    string filename = importDG.FileName;
+                    
+
+                    try
+                    {
+                        WalletList = ReadFromJsonFile<List<WalletClass>>(filename);
+                    }
+                    catch (Exception ex)
+                    {
+                        DebugMsg("Error deserializing json file - bad format? : " + ex.Message);
+                        return false;
+                    }
+
+
+                    DebugMsg("wallets.json import OK\r\n");
+                    res = true;
+
+                }
+                catch (Exception ex)
+                {
+                    DebugMsg("Error reading file : [ " + ex.Message + "]");
+                    res = false;
+                }
+            }
+
+            return res;
+
+        }
+
+        //use a dialog to select and import a config.json into the selected index in WalletList and the corresponding eon folder
+        private bool ImportJsonDLG(int index)
+        {
+            bool res = false;
+
             //import a json file, overwrites existing one
             OpenFileDialog importDG = new OpenFileDialog
             {
@@ -970,44 +1426,61 @@ namespace ExscudoTestnetGUI
                 {
                     string filename = importDG.FileName;
                     string newJSON = File.ReadAllText(filename);
+                    configClass thisConf = new configClass();
 
                     try
                     {
-                        conf = JsonConvert.DeserializeObject<configClass>(newJSON);
+                        thisConf = JsonConvert.DeserializeObject<configClass>(newJSON);
                     }
                     catch (Exception ex)
                     {
                         DebugMsg("Error deserializing json file - bad format? : " + ex.Message);
+                        return false;
                     }
 
-                    UpdateConfigDisplay();
+                    //UpdateConfigDisplay();
 
-                    //save this conf locally.
-                    WriteConfig();
+                    //save this config object in the walletlist & create the config file
+                    WalletList[index].ConfigJson = thisConf;
+                    WriteConfig(index);
 
                     //get the account info and populate the GUI
-                    debugTB.Text = "";
-                    string res = EonCMD("eon info");
-                    UpdateAccountInfo(res);
-                    registerWarning = false;
-                    UpdateBalance(EonCMD("eon state"));
+                    //debugTB.Text = "";
+                    //string res = EonCMD("eon info");
+                    //UpdateAccountInfo(res);
+                    //registerWarning = false;
+                    //UpdateBalance(EonCMD("eon state"));
 
-                    DebugMsg("config.json updated by file import\r\n");
+                    DebugMsg("config.json import OK\r\n");
+                    res = true;
 
                 }
                 catch (Exception ex)
                 {
                     DebugMsg("Error: Could not read file. [ " + ex.Message + "]");
+                    res = false;
                 }
             }
+
+            return res;
         }
 
-        private void ImportConfigjsonToolStripMenuItem_Click(object sender, EventArgs e)
+
+        private void ImportWalletsjsonToolStripMenuItem_Click(object sender, EventArgs e)
         {
             try
             {
+                //stop the eonthread
+                eonThreadRun = false;
 
-                ImportJson();
+                //show file requester for importing wallets.json and rebuild the working folders
+                if (ImportWalletsJson())
+                {
+                    RebuildWorkingFolders(true);
+                }
+
+
+
             }
             catch(Exception ex)
             {
@@ -1017,12 +1490,12 @@ namespace ExscudoTestnetGUI
 
         }
 
-        private void ExportConfigjsonToolStripMenuItem_Click(object sender, EventArgs e)
+        private void ExportWalletsJsonToolStripMenuItem_Click(object sender, EventArgs e)
         {
             //export the json file somewhere.
             SaveFileDialog jsonDG = new SaveFileDialog
             {
-                Filter = "json files (*.json)|*.json",
+                Filter = "wallets.json files (*.json)|*.json",
                 FilterIndex = 1,
                 RestoreDirectory = true
             };
@@ -1034,10 +1507,16 @@ namespace ExscudoTestnetGUI
 
                     string filename = jsonDG.FileName;
 
-                    string jsonData = JsonConvert.SerializeObject(conf);
-                    File.WriteAllText(filename, jsonData);
-                    DebugMsg("File export OK\r\n");
-                    LogMsg("File export OK\r\n");
+                    try
+                    {
+                        WriteToJsonFile(filename, WalletList, false);
+                        DebugLogMsg("Wallets.json export OK\r\n");
+                    }
+                    catch (Exception ex)
+                    {
+                        DebugLogMsg("SaveWalletList() Exception saving wallets.json : " + ex.Message);
+                    }
+                    
                 }
             }
             catch(Exception ex)
@@ -1056,7 +1535,7 @@ namespace ExscudoTestnetGUI
             try
             {
                 //launch eon command line
-                Process.Start("explorer.exe", Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
+                Process.Start("explorer.exe", appPath + @"\eon" + selectedWallet);
             }
             catch (Exception ex)
             {
@@ -1077,31 +1556,28 @@ namespace ExscudoTestnetGUI
             if (res == DialogResult.Yes)
             {
                 //code for Yes
-                string refillResp = EonCMD("eon refill " + balDepAmountTB.Text);
+                string refillResp = EonCMD(selectedWallet, "eon refill " + balDepAmountTB.Text);
 
                 if (refillResp != "-1")
                 {
                     try
                     {
-                        //strip the generic stuff
-                        refillResp = refillResp.Substring(refillResp.IndexOf("Deposit refill,"), refillResp.IndexOf("end...") - refillResp.IndexOf("Deposit refill,"));
+                        string pt = @"Amount:\s(\d*.\d*)\s*([^\n]*)";
+                        Match rfMatch = Regex.Match(refillResp, pt);
 
-                        //get the reported amount
-                        int ind1 = refillResp.IndexOf("Amount:") + 7;
-                        int ind2 = refillResp.IndexOf("\r\n", ind1);
-
-                        int rAmount = Convert.ToInt16(refillResp.Substring(ind1, ind2 - ind1));
-
-                        //get the result
-                        int ind3 = refillResp.IndexOf("\"") + 1;
-                        int ind4 = refillResp.LastIndexOf("\"");
-                        string resultS = refillResp.Substring(ind3, ind4 - ind3);
-                        //MessageBox.Show();
-                        using (DialogCenteringService centeringService = new DialogCenteringService(this)) // center message box
+                        if (rfMatch.Groups.Count == 3)
                         {
-                            MessageBox.Show("Refill " + rAmount + " : " + resultS);
-                            DebugClear();
-                            DebugMsg(refillResp + "\r\n");
+                            string amount = rfMatch.Groups[1].ToString();
+                            string resultS = rfMatch.Groups[2].ToString();
+
+
+                            using (DialogCenteringService centeringService = new DialogCenteringService(this)) // center message box
+                            {
+                                MessageBox.Show("Refill " + amount + " : " + resultS);
+                                DebugClear();
+                                DebugMsg(refillResp + "\r\n");
+                            }
+
                         }
                     }
                     catch(Exception ex)
@@ -1138,32 +1614,29 @@ namespace ExscudoTestnetGUI
 
             if (res == DialogResult.Yes)
             {
-                //code for Yes
-                string wdResp = EonCMD("eon withdraw " + balDepAmountTB.Text);
+                string wdResp = EonCMD(selectedWallet, "eon withdraw " + balDepAmountTB.Text);
 
                 if (wdResp != "-1")
                 {
                     try
                     {
-                        //strip the generic stuff
-                        wdResp = wdResp.Substring(wdResp.IndexOf("Deposit"), wdResp.IndexOf("end...") - wdResp.IndexOf("Deposit"));
+                        string pt = @"Amount:\s(\d*.\d*)\s*([^\n]*)";
+                        Match wdMatch = Regex.Match(wdResp, pt);
 
-                        //get the reported amount
-                        int ind1 = wdResp.IndexOf("Amount:") + 7;
-                        int ind2 = wdResp.IndexOf("\r\n", ind1);
-
-                        //get the result
-                        int ind3 = wdResp.IndexOf("\"") + 1;
-                        int ind4 = wdResp.LastIndexOf("\"");
-                        string resultS = wdResp.Substring(ind3, ind4 - ind3);
-                        //MessageBox.Show();
-                        using (DialogCenteringService centeringService = new DialogCenteringService(this)) // center message box
+                        if (wdMatch.Groups.Count == 3)
                         {
-                            MessageBox.Show("Withdraw " + balDepAmountTB.Text + " : " + resultS);
+                            string amount = wdMatch.Groups[1].ToString();
+                            string resultS = wdMatch.Groups[2].ToString();
 
-                            DebugClear();
-                            DebugMsg(wdResp + "\r\n");
+                            //MessageBox.Show();
+                            using (DialogCenteringService centeringService = new DialogCenteringService(this)) // center message box
+                            {
+                                MessageBox.Show("Withdraw " + amount + " : " + resultS);
+                                DebugClear();
+                                DebugMsg(wdResp + "\r\n");
+                            }
                         }
+                        
                     }
                     catch (Exception ex)
                     {
@@ -1196,18 +1669,28 @@ namespace ExscudoTestnetGUI
 
             using (DialogCenteringService centeringService = new DialogCenteringService(this)) // center message box
             {
-                res = MessageBox.Show("Send " + txAmountTB.Text + " to account : " + recipientAddress, "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                res = MessageBox.Show("Send " + txAmountTB.Text + " from " + WalletList[selectedWallet].AccountID + "\r\n to account : " + recipientAddress + "?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
             }
 
             if (res == DialogResult.Yes)
             {
                 //code for Yes
-                string txResp = EonCMD("eon payment " + recipientAddress + " " + txAmountTB.Text);
+                string txResp = EonCMD(selectedWallet, "eon payment " + recipientAddress + " " + txAmountTB.Text);
 
                 if (txResp != "-1")
                 {
                     try
                     {
+
+                        //extract the values
+                        string pattern = @"account:([^\s]*)\s*Amount:\s(\d*.\d*)\s*([^\n]*)";
+                        Match paymentResultMatch = Regex.Match(txResp, pattern);
+
+                        string rAccount = paymentResultMatch.Groups[1].ToString();
+                        string rAmount = paymentResultMatch.Groups[2].ToString();
+                        string resultS = paymentResultMatch.Groups[3].ToString();
+
+                        /*
                         //strip the generic stuff
                         txResp = txResp.Substring(txResp.IndexOf("Ordinary"), txResp.IndexOf("end...") - txResp.IndexOf("Ordinary"));
 
@@ -1228,10 +1711,12 @@ namespace ExscudoTestnetGUI
                         int ind3 = txResp.IndexOf("\"") + 1;
                         int ind4 = txResp.LastIndexOf("\"");
                         string resultS = txResp.Substring(ind3, ind4 - ind3);
+                        */
+
                         //MessageBox.Show();
                         using (DialogCenteringService centeringService = new DialogCenteringService(this)) // center message box
                         {
-                            MessageBox.Show("Sent " + rAmount + " to " + rAccount + " : " + resultS);
+                            MessageBox.Show("Send " + rAmount + " from " + WalletList[selectedWallet].AccountID + " to " + rAccount + " : " + resultS);
 
                             DebugClear();
                             DebugMsg(txResp + "\r\n");
@@ -1279,11 +1764,221 @@ namespace ExscudoTestnetGUI
 
         private void UncommitBTN_Click(object sender, EventArgs e)
         {
-            string commitResponse = EonCMD("eon uncommit " + accountTB.Text);
+            string commitResponse = EonCMD(selectedWallet, "eon uncommit " + accountTB.Text);
             if (commitResponse != "-1") UpdateCommited(commitResponse);
         }
 
+        /// <summary>
+        /// Writes the given object instance to a Json file.
+        /// <para>Object type must have a parameterless constructor.</para>
+        /// <para>Only Public properties and variables will be written to the file. These can be any type though, even other classes.</para>
+        /// <para>If there are public properties/variables that you do not want written to the file, decorate them with the [JsonIgnore] attribute.</para>
+        /// </summary>
+        /// <typeparam name="T">The type of object being written to the file.</typeparam>
+        /// <param name="filePath">The file path to write the object instance to.</param>
+        /// <param name="objectToWrite">The object instance to write to the file.</param>
+        /// <param name="append">If false the file will be overwritten if it already exists. If true the contents will be appended to the file.</param>
+        public static void WriteToJsonFile<T>(string filePath, T objectToWrite, bool append = false) where T : new()
+        {
+            TextWriter writer = null;
+            try
+            {
+                var contentsToWriteToFile = JsonConvert.SerializeObject(objectToWrite);
+                writer = new StreamWriter(filePath, append);
+                writer.Write(contentsToWriteToFile);
+            }
+            finally
+            {
+                if (writer != null)
+                    writer.Close();
+            }
+        }
 
+        /// <summary>
+        /// Reads an object instance from an Json file.
+        /// <para>Object type must have a parameterless constructor.</para>
+        /// </summary>
+        /// <typeparam name="T">The type of object to read from the file.</typeparam>
+        /// <param name="filePath">The file path to read the object instance from.</param>
+        /// <returns>Returns a new instance of the object read from the Json file.</returns>
+        public static T ReadFromJsonFile<T>(string filePath) where T : new()
+        {
+            TextReader reader = null;
+            try
+            {
+                reader = new StreamReader(filePath);
+                var fileContents = reader.ReadToEnd();
+                return JsonConvert.DeserializeObject<T>(fileContents);
+            }
+            finally
+            {
+                if (reader != null)
+                    reader.Close();
+            }
+        }
+
+        private void AccountLV_SelectionChanged(object sender, EventArgs e)
+        {
+            if ((0 <= accountLV.SelectedIndex) && (accountLV.SelectedIndex <= (WalletList.Count-1)))
+            {
+                selectedWallet = accountLV.SelectedIndex;
+                accountTB.Text = WalletList[selectedWallet].AccountID;
+                pubkeyTB.Text = WalletList[selectedWallet].PublicKey;
+                UpdateConfigDisplay(selectedWallet);
+                SyncGUIBalances();
+            }
+        }
+
+        private void rebuildWorkingFoldersToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            //allow eon thread to shut down
+            eonThreadRun = false;
+            Thread.Sleep(2);
+
+            RebuildWorkingFolders(true);
+        }
+
+        private bool RebuildWorkingFolders(bool restoreWallets)
+        {
+            bool res = false;
+
+            //clear the gui elements
+            accountTB.Text = "";
+            pubkeyTB.Text = "";
+            rxAddressLBL.Text = "";
+            balanceLBL.Text = "";
+            depositLBL.Text = "";
+            accountLV.ClearObjects();
+            transactionLV.ClearObjects();
+
+
+            
+            try
+            {
+                //delete workingfolders
+                DirectoryInfo di = new System.IO.DirectoryInfo(appPath + @"\");
+                foreach (FileInfo file in di.GetFiles())
+                {
+                    file.Delete();
+                }
+                foreach (DirectoryInfo dir in di.GetDirectories())
+                {
+                    dir.Delete(true);
+                }
+
+                Thread.Sleep(500);
+
+                //re-save wallets.json if we are restoring it
+                if (restoreWallets)
+                {
+                    SaveWalletList();
+                }
+                else //otherwise restore the default conditions of fresh start
+                {
+                    WalletList.Clear();
+                    mainWallet = new WalletClass();
+                    WalletList.Add(mainWallet);
+                    
+                }
+                
+                //set the primary wallet as default selected
+                selectedWallet = 0;
+                
+                //rebuild working folders (restart the eon thread now)
+                eonThreadRun = true;
+
+                //start the eon thread
+                eonThread = new Thread(new ThreadStart(EonThreadStart));
+                eonThread.SetApartmentState(ApartmentState.STA);
+                eonThread.Start();
+
+                res = true;
+
+            }
+            catch (Exception ex)
+            {
+                DebugMsg("ImportWallets() failed to delete working folders : [ " + ex.Message + "]");
+            }
+
+            return res;
+        }
+
+
+        private void resetAllConfigToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            //allow eon thread to shut down
+            eonThreadRun = false;
+            Thread.Sleep(2);
+
+            //rebuild and restart, without restoring wallets.json
+            RebuildWorkingFolders(false);
+        }
+
+        //create new account button
+        private void createAccountBTN_Click(object sender, EventArgs e)
+        {
+            //allow eon thread to shut down
+            //eonThreadRun = false;
+
+            //show a dialog and get a nickname for the account
+            CreateNewAccountDialog naDialog = new CreateNewAccountDialog();
+
+            naDialog.ShowDialog();
+
+            if (naDialog.result == "Create")
+            {
+                string nick = naDialog.nickname;
+
+                int walletIndex = WalletList.Count;
+
+                //create a new SEED
+                string seedResponse = EonCMD(0, "eon seed");
+                DebugLogMsg(seedResponse);
+                string pattern = @"Seed:\s*(.*)\s*Account:\s*(.*)\s*Public key:\s*(.*)";
+                Match srMatch = Regex.Match(seedResponse, pattern);
+
+
+                string seed = srMatch.Groups[1].ToString();
+                string accountID = srMatch.Groups[2].ToString();
+                string publicKey = srMatch.Groups[3].ToString();
+
+                //register this new account (its not primary)
+                string createResponse = EonCMD(0, "eon new_account " + publicKey);
+                DebugLogMsg(createResponse);
+                string pattern2 = @"send transaction.*<<\s*""(.*)""";
+                Match crMatch = Regex.Match(createResponse, pattern2);
+                string createResult = crMatch.Groups[1].ToString();
+                
+                if (createResult == "success")
+                {
+                    //create a new wallet in our list
+                    WalletClass wal = new WalletClass
+                    {
+                        AccountID = accountID,
+                        PublicKey = publicKey,
+                        Seed = seed,
+                        NickName = nick
+                    };
+                    WalletList.Add(wal);
+
+                    SetupEonFolder(walletIndex);
+
+                    //new account has been created.  update the walletlist item and the config file
+                    ReadConfigObject(walletIndex);
+                    WalletList[walletIndex].Seed = seed.Trim();
+                    WalletList[walletIndex].AccountID = accountID.Trim();
+                    WalletList[walletIndex].PublicKey = publicKey.Trim();
+                    if (walletIndex == 0) WalletList[walletIndex].NickName = nick.Trim();
+                    WalletList[walletIndex].ConfigJson.Payouts.Seed = seed.Trim();
+                    WriteConfig(walletIndex);
+                    SaveWalletList();
+
+                }
+
+            }
+
+
+        }
     }
 
 

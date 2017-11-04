@@ -59,5 +59,88 @@ namespace ExscudoTestnetGUI.Properties {
                 resourceCulture = value;
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {
+        ///	&quot;threads&quot;: 2,
+        ///	&quot;coin&quot;: &quot;eon&quot;,
+        ///	&quot;name&quot;: &quot;main&quot;,
+        ///
+        ///	&quot;upstreamCheckInterval&quot;: &quot;5s&quot;,
+        ///
+        ///	&quot;payouts&quot;: {
+        ///		&quot;enabled&quot;: true,
+        ///		&quot;interval&quot;: &quot;120m&quot;,
+        ///
+        ///		&quot;peer&quot;: &quot;peer.testnet.eontechnology.org:9443&quot;,
+        ///		&quot;seed&quot;: &quot;&lt;SEED&gt;&quot;,
+        ///
+        ///		&quot;deadline&quot;: 60,
+        ///		&quot;fee&quot;: 10,
+        ///
+        ///		&quot;raw&quot;: false,
+        ///
+        ///		&quot;timeout&quot;: &quot;10s&quot;,
+        ///		&quot;threshold&quot;: 500000000
+        ///	}
+        ///
+        ///}
+        ///.
+        /// </summary>
+        internal static string config {
+            get {
+                return ResourceManager.GetString("config", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] eon32 {
+            get {
+                object obj = ResourceManager.GetObject("eon32", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] eon64 {
+            get {
+                object obj = ResourceManager.GetObject("eon64", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to # Configuration file
+        ///
+        ///To connect to a peer, you need to set an address
+        ///
+        ///    &quot;peer&quot;: &quot;peer.testnet.eontechnology.org:9443&quot;,
+        ///
+        ///Seed for the account on behalf of which we will sign transactions
+        ///
+        ///    &quot;seed&quot;: &quot;...&quot;,
+        ///
+        ///Transaction’s secondary fields, are needed to manage the commission and the transaction lifetime
+        ///
+        ///    &quot;deadline&quot;: 60,
+        ///    &quot;fee&quot;: 10,
+        ///
+        ///# Command description
+        ///
+        ///List of commands available
+        ///
+        ///Command     | Description
+        ///:-----------|:--------
+        ///refill      | Transfer coins from amount to de [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string ReadMe {
+            get {
+                return ResourceManager.GetString("ReadMe", resourceCulture);
+            }
+        }
     }
 }

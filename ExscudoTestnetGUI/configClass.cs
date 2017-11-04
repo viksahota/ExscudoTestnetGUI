@@ -32,11 +32,14 @@ namespace ExscudoTestnetGUI
             [JsonProperty("fee")]
             public uint Fee { get; set; }
 
+            [JsonProperty("raw")]
+            public bool Raw { get; set; }
+
             [JsonProperty("timeout")]
             public string Timeout { get; set; }
 
             [JsonProperty("threshold")]
-            public uint Threshold { get; set; }
+            public long Threshold { get; set; }
         }
     }
 

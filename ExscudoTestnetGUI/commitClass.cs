@@ -26,14 +26,20 @@ namespace ExscudoTestnetGUI
 
     internal partial class commitClass
     {
-        internal class All2
+        public class All2
         {
 
             [JsonProperty("type")]
             public int Type { get; set; }
 
+            [JsonProperty("typeString")]
+            public string TypeString { get; set; }
+
             [JsonProperty("timestamp")]
             public ulong Timestamp { get; set; }
+
+            [JsonProperty("timestampString")]
+            public string TimestampString { get; set; }
 
             [JsonProperty("deadline")]
             public uint Deadline { get; set; }
