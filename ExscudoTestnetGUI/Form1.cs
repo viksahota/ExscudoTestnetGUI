@@ -44,6 +44,8 @@ namespace ExscudoTestnetGUI
         Thread eonThread;
         bool eonThreadRun = true;
         bool os64bit = false;
+        //so we know when the selected wallet is really changed, can be spurious events
+        int lastWalletIndex = -1;
 
         string appPath = "";
                 
@@ -1049,8 +1051,7 @@ namespace ExscudoTestnetGUI
 
         }
 
-
-   // ------------------------------------------------------------------------------------- needs updating for multi - wallet !!!!!!!!!!!!!!!!!!!!!!!
+        //takes the current settings on screen and stores them in the selectedWallet, writes the updated config.json to the directory to apply the changes.
         private void WriteConfigBTN_Click(object sender, EventArgs e)
         {
             WalletList[selectedWallet].ConfigJson.Threads = (byte)rootThreadsNM.Value;
@@ -1147,16 +1148,19 @@ namespace ExscudoTestnetGUI
                     logTB.Text = logTB.Text.Remove(0, 500);
                 }
 
-                logTB.Text += (DateTime.Now.ToLongTimeString() + ": " + line + "\r\n");
+                //logTB.Text += (DateTime.Now.ToLongTimeString() + ": " + line + "\r\n");
+                logTB.AppendText(DateTime.Now.ToLongTimeString() + ": " + line + "\r\n");
                 //logTB.Text += line;
 
                 if (logScrollCB.Checked)
                 {
-                    this.logTB.SelectionStart = logTB.Text.Length;
-                    this.logTB.ScrollToCaret();
+                    //logTB.Select(logTB.Text.Length, 0);
+                    
+                    logTB.SelectionStart = logTB.Text.Length;
+                    logTB.ScrollToCaret();
                 }
-            
-                this.logTB.Update();
+
+                logTB.Update();
             }
         }
 
@@ -1814,15 +1818,20 @@ namespace ExscudoTestnetGUI
 
         private void AccountLV_SelectionChanged(object sender, EventArgs e)
         {
-            if ((0 <= accountLV.SelectedIndex) && (accountLV.SelectedIndex <= (WalletList.Count-1)))
+            if ((0 <= accountLV.SelectedIndex) && (accountLV.SelectedIndex <= (WalletList.Count - 1)))
             {
-                selectedWallet = accountLV.SelectedIndex;
-                accountTB.Text = WalletList[selectedWallet].AccountID;
-                pubkeyTB.Text = WalletList[selectedWallet].PublicKey;
-                UpdateConfigDisplay(selectedWallet);
-                SyncGUIBalances();
+                if (accountLV.SelectedIndex != lastWalletIndex)
+                {
+                    selectedWallet = accountLV.SelectedIndex;
+                    accountTB.Text = WalletList[selectedWallet].AccountID;
+                    pubkeyTB.Text = WalletList[selectedWallet].PublicKey;
+                    UpdateConfigDisplay(selectedWallet);
+                    SyncGUIBalances();
+                    lastWalletIndex = accountLV.SelectedIndex;
+                }
             }
         }
+        
 
         private void RebuildWorkingFoldersToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -1973,6 +1982,17 @@ namespace ExscudoTestnetGUI
             }
 
 
+        }
+
+        private void tabControl1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (tabControl1.SelectedIndex==3)
+            {
+                logTB.Focus();
+                logTB.SelectionStart = logTB.Text.Length;
+                logTB.ScrollToCaret();
+                logTB.Update();
+            }
         }
     }
 

@@ -15,7 +15,7 @@ namespace ExscudoTestnetGUI
         {
 
             [JsonProperty("amount")]
-            public ulong Amount { get; set; }
+            public decimal Amount { get; set; }
 
             [JsonProperty("recipient")]
             public string Recipient { get; set; }

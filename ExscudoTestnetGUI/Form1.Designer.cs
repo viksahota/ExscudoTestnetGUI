@@ -36,6 +36,7 @@
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.walletTab = new System.Windows.Forms.TabPage();
             this.groupBox12 = new System.Windows.Forms.GroupBox();
+            this.createAccountBTN = new System.Windows.Forms.Button();
             this.accountLV = new BrightIdeasSoftware.ObjectListView();
             this.olvColumn1 = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.olvColumn2 = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
@@ -121,7 +122,7 @@
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panel1 = new System.Windows.Forms.Panel();
-            this.createAccountBTN = new System.Windows.Forms.Button();
+            this.senderColumn = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.groupBox1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.walletTab.SuspendLayout();
@@ -213,6 +214,7 @@
             this.tabControl1.SelectedIndex = 0;
             this.tabControl1.Size = new System.Drawing.Size(1525, 1092);
             this.tabControl1.TabIndex = 1;
+            this.tabControl1.SelectedIndexChanged += new System.EventHandler(this.tabControl1_SelectedIndexChanged);
             // 
             // walletTab
             // 
@@ -238,6 +240,16 @@
             this.groupBox12.TabIndex = 15;
             this.groupBox12.TabStop = false;
             this.groupBox12.Text = "Accounts";
+            // 
+            // createAccountBTN
+            // 
+            this.createAccountBTN.Location = new System.Drawing.Point(356, 376);
+            this.createAccountBTN.Name = "createAccountBTN";
+            this.createAccountBTN.Size = new System.Drawing.Size(195, 33);
+            this.createAccountBTN.TabIndex = 25;
+            this.createAccountBTN.Text = "Create new account";
+            this.createAccountBTN.UseVisualStyleBackColor = true;
+            this.createAccountBTN.Click += new System.EventHandler(this.CreateAccountBTN_Click);
             // 
             // accountLV
             // 
@@ -537,6 +549,7 @@
             this.transactionLV.AllColumns.Add(this.typeColumn);
             this.transactionLV.AllColumns.Add(this.amountColumn);
             this.transactionLV.AllColumns.Add(this.feeColumn);
+            this.transactionLV.AllColumns.Add(this.senderColumn);
             this.transactionLV.AllColumns.Add(this.recipientColumn);
             this.transactionLV.AllColumns.Add(this.signatureColumn);
             this.transactionLV.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
@@ -544,6 +557,7 @@
             this.typeColumn,
             this.amountColumn,
             this.feeColumn,
+            this.senderColumn,
             this.recipientColumn,
             this.signatureColumn});
             this.transactionLV.Location = new System.Drawing.Point(21, 83);
@@ -586,7 +600,7 @@
             // 
             this.recipientColumn.AspectName = "Attachment.Recipient";
             this.recipientColumn.Text = "Recipient";
-            this.recipientColumn.Width = 150;
+            this.recipientColumn.Width = 160;
             // 
             // signatureColumn
             // 
@@ -938,6 +952,7 @@
             // 
             // rootCoinTB
             // 
+            this.rootCoinTB.ImeMode = System.Windows.Forms.ImeMode.On;
             this.rootCoinTB.Location = new System.Drawing.Point(139, 25);
             this.rootCoinTB.Name = "rootCoinTB";
             this.rootCoinTB.Size = new System.Drawing.Size(100, 26);
@@ -1141,20 +1156,17 @@
             this.panel1.Size = new System.Drawing.Size(1549, 50);
             this.panel1.TabIndex = 14;
             // 
-            // createAccountBTN
+            // senderColumn
             // 
-            this.createAccountBTN.Location = new System.Drawing.Point(356, 376);
-            this.createAccountBTN.Name = "createAccountBTN";
-            this.createAccountBTN.Size = new System.Drawing.Size(195, 33);
-            this.createAccountBTN.TabIndex = 25;
-            this.createAccountBTN.Text = "Create new account";
-            this.createAccountBTN.UseVisualStyleBackColor = true;
-            this.createAccountBTN.Click += new System.EventHandler(this.CreateAccountBTN_Click);
+            this.senderColumn.AspectName = "Sender";
+            this.senderColumn.Text = "Sender";
+            this.senderColumn.Width = 160;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScroll = true;
             this.AutoSize = true;
             this.ClientSize = new System.Drawing.Size(1549, 1196);
             this.Controls.Add(this.panel1);
@@ -1309,6 +1321,7 @@
         private System.Windows.Forms.ToolStripMenuItem rebuildWorkingFoldersToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem resetAllConfigToolStripMenuItem;
         private System.Windows.Forms.Button createAccountBTN;
+        private BrightIdeasSoftware.OLVColumn senderColumn;
     }
 }
 
