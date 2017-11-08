@@ -27,7 +27,7 @@
     <PublisherName>kinetic-designs</PublisherName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>exscudogui.htm</WebPage>
-    <ApplicationRevision>19</ApplicationRevision>
+    <ApplicationRevision>20</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -90,6 +90,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AboutDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AboutDialog.Designer.cs">
+      <DependentUpon>AboutDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="AccountSeedDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -121,6 +127,9 @@
       <DependentUpon>SetupWalletDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="WalletClass.cs" />
+    <EmbeddedResource Include="AboutDialog.resx">
+      <DependentUpon>AboutDialog.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="AccountSeedDialog.resx">
       <DependentUpon>AccountSeedDialog.cs</DependentUpon>
     </EmbeddedResource>

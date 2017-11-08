@@ -1748,11 +1748,9 @@ namespace ExscudoTestnetGUI
 
         private void AboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            //MessageBox.Show();
-            using (DialogCenteringService centeringService = new DialogCenteringService(this)) // center message box
-            {
-                MessageBox.Show("Exscudo Testnet GUI\r\n\r\nNon-official test net tool\r\n\r\nexscudo slack user : gassman\r\nOct 2017","About");
-            }
+            AboutDialog aDialog = new AboutDialog();
+            aDialog.ShowDialog();
+           
         }
 
         private void QuitToolStripMenuItem_Click(object sender, EventArgs e)
