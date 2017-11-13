@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,7 +18,7 @@ namespace ExscudoTestnetGUI
         public DialogCenteringService(IWin32Window owner)
         {
             //null check
-            this.owner = owner ?? throw new ArgumentNullException("owner");
+            //this.owner = owner ?? throw new ArgumentNullException("owner");
             hookProc = DialogHookProc;
 
             hHook = SetWindowsHookEx(WH_CALLWNDPROCRET, hookProc, IntPtr.Zero, GetCurrentThreadId());
@@ -212,7 +210,7 @@ namespace ExscudoTestnetGUI
             public IntPtr wParam;
             public uint message;
             public IntPtr hwnd;
-        };
+        }
         // ReSharper restore InconsistentNaming
 
         private enum SetWindowPosFlags : uint
@@ -231,7 +229,7 @@ namespace ExscudoTestnetGUI
             DoNotSendChangingEvent = 0x0400,
             IgnoreResize = 0x0001,
             IgnoreZOrder = 0x0004,
-            ShowWindow = 0x0040,
+            ShowWindow = 0x0040
         }
     }
 }

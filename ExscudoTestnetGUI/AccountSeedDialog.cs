@@ -1,11 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace ExscudoTestnetGUI
@@ -13,7 +6,7 @@ namespace ExscudoTestnetGUI
     public partial class AccountSeedDialog : Form
     {
 
-        public bool result = false;
+        public bool result;
         public string seedVal = "";
         public string nickName = "";
 
@@ -28,7 +21,7 @@ namespace ExscudoTestnetGUI
             seedVal = seedTB.Text;
             nickName = nameTB.Text;
             result = true;
-            this.Dispose();
+            Dispose();
         }
 
         public void setAccountLabel(string text)
@@ -40,7 +33,7 @@ namespace ExscudoTestnetGUI
         private void button2_Click(object sender, EventArgs e)
         {
             result = false;
-            this.Dispose();
+            Dispose();
         }
     }
 }
