@@ -1,11 +1,14 @@
-﻿namespace ExscudoTestnetGUI
+﻿using System.ComponentModel;
+using System.Windows.Forms;
+
+namespace ExscudoTestnetGUI
 {
     partial class AccountSeedDialog
     {
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -157,15 +160,15 @@
 
         #endregion
 
-        private System.Windows.Forms.TextBox nameTB;
-        private System.Windows.Forms.TextBox seedTB;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.Label accountLabel;
-        private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.Label label6;
-        private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.Button button2;
+        private TextBox nameTB;
+        private TextBox seedTB;
+        private Label label1;
+        private Label label2;
+        private Label label3;
+        private Label accountLabel;
+        private Label label5;
+        private Label label6;
+        private Button button1;
+        private Button button2;
     }
 }
