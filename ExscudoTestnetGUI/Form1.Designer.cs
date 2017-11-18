@@ -74,6 +74,7 @@ namespace ExscudoTestnetGUI
             this.typeColumn = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.amountColumn = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.feeColumn = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.senderColumn = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.recipientColumn = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.signatureColumn = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.configTab = new System.Windows.Forms.TabPage();
@@ -126,7 +127,6 @@ namespace ExscudoTestnetGUI
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panel1 = new System.Windows.Forms.Panel();
-            this.senderColumn = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.groupBox1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.walletTab.SuspendLayout();
@@ -218,7 +218,7 @@ namespace ExscudoTestnetGUI
             this.tabControl1.SelectedIndex = 0;
             this.tabControl1.Size = new System.Drawing.Size(1525, 1092);
             this.tabControl1.TabIndex = 1;
-            this.tabControl1.SelectedIndexChanged += new System.EventHandler(this.tabControl1_SelectedIndexChanged);
+            this.tabControl1.SelectedIndexChanged += new System.EventHandler(this.TabControl1_SelectedIndexChanged);
             // 
             // walletTab
             // 
@@ -263,6 +263,7 @@ namespace ExscudoTestnetGUI
             this.accountLV.AllColumns.Add(this.olvColumn3);
             this.accountLV.AllColumns.Add(this.olvColumn4);
             this.accountLV.AlternateRowBackColor = System.Drawing.Color.White;
+            this.accountLV.CellEditUseWholeCell = false;
             this.accountLV.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.olvColumn1,
             this.olvColumn2,
@@ -556,6 +557,7 @@ namespace ExscudoTestnetGUI
             this.transactionLV.AllColumns.Add(this.senderColumn);
             this.transactionLV.AllColumns.Add(this.recipientColumn);
             this.transactionLV.AllColumns.Add(this.signatureColumn);
+            this.transactionLV.CellEditUseWholeCell = false;
             this.transactionLV.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.timestampColumn,
             this.typeColumn,
@@ -564,6 +566,7 @@ namespace ExscudoTestnetGUI
             this.senderColumn,
             this.recipientColumn,
             this.signatureColumn});
+            this.transactionLV.Cursor = System.Windows.Forms.Cursors.Default;
             this.transactionLV.Location = new System.Drawing.Point(21, 83);
             this.transactionLV.Name = "transactionLV";
             this.transactionLV.ShowGroups = false;
@@ -600,6 +603,12 @@ namespace ExscudoTestnetGUI
             this.feeColumn.Text = "Fee";
             this.feeColumn.Width = 50;
             // 
+            // senderColumn
+            // 
+            this.senderColumn.AspectName = "Sender";
+            this.senderColumn.Text = "Sender";
+            this.senderColumn.Width = 160;
+            // 
             // recipientColumn
             // 
             this.recipientColumn.AspectName = "Attachment.Recipient";
@@ -611,7 +620,6 @@ namespace ExscudoTestnetGUI
             this.signatureColumn.AspectName = "Signature";
             this.signatureColumn.Text = "Signature";
             this.signatureColumn.Width = 280;
-            this.signatureColumn.WordWrap = true;
             // 
             // configTab
             // 
@@ -1159,12 +1167,6 @@ namespace ExscudoTestnetGUI
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(1549, 50);
             this.panel1.TabIndex = 14;
-            // 
-            // senderColumn
-            // 
-            this.senderColumn.AspectName = "Sender";
-            this.senderColumn.Text = "Sender";
-            this.senderColumn.Width = 160;
             // 
             // Form1
             // 

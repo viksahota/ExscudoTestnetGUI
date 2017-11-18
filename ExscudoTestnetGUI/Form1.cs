@@ -467,7 +467,7 @@ namespace ExscudoTestnetGUI
             {
                     _selectedWallet = index;
                     accountLV.SelectedIndex = index;
-                    accountLV.UnfocusedHighlightBackgroundColor = Color.BlanchedAlmond;
+                    accountLV.UnfocusedSelectedBackColor = Color.BlanchedAlmond;
                     accountLV.Update();
                     UpdateConfigDisplay(_selectedWallet);
 
@@ -1901,7 +1901,7 @@ namespace ExscudoTestnetGUI
 
         }
 
-        private void tabControl1_SelectedIndexChanged(object sender, EventArgs e)
+        private void TabControl1_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (tabControl1.SelectedIndex==3)
             {

@@ -10,7 +10,7 @@ namespace ExscudoTestnetGUI
             InitializeComponent();
         }
 
-        private void textBox4_TextChanged(object sender, EventArgs e)
+        private void TextBox4_TextChanged(object sender, EventArgs e)
         {
 
         }

@@ -18,7 +18,7 @@ namespace ExscudoTestnetGUI
         public DialogCenteringService(IWin32Window owner)
         {
             //null check
-            //this.owner = owner ?? throw new ArgumentNullException("owner");
+            this.owner = owner ?? throw new ArgumentNullException("owner");
             hookProc = DialogHookProc;
 
             hHook = SetWindowsHookEx(WH_CALLWNDPROCRET, hookProc, IntPtr.Zero, GetCurrentThreadId());

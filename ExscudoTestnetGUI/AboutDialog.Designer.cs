@@ -148,7 +148,7 @@ namespace ExscudoTestnetGUI
             this.textBox4.TabIndex = 10;
             this.textBox4.Text = resources.GetString("textBox4.Text");
             this.textBox4.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.textBox4.TextChanged += new System.EventHandler(this.textBox4_TextChanged);
+            this.textBox4.TextChanged += new System.EventHandler(this.TextBox4_TextChanged);
             // 
             // textBox5
             // 
