@@ -109,6 +109,62 @@ namespace ExscudoTestnetGUI
             this.label1 = new System.Windows.Forms.Label();
             this.logTab = new System.Windows.Forms.TabPage();
             this.logTB = new System.Windows.Forms.TextBox();
+            this.testTab = new System.Windows.Forms.TabPage();
+            this.groupBox13 = new System.Windows.Forms.GroupBox();
+            this.groupBox16 = new System.Windows.Forms.GroupBox();
+            this.label29 = new System.Windows.Forms.Label();
+            this.label25 = new System.Windows.Forms.Label();
+            this.swapTestTxSize = new System.Windows.Forms.TextBox();
+            this.swapTestStop_BTN = new System.Windows.Forms.Button();
+            this.swapTestReset_BTN = new System.Windows.Forms.Button();
+            this.swapTestStart_BTN = new System.Windows.Forms.Button();
+            this.groupBox15 = new System.Windows.Forms.GroupBox();
+            this.label44 = new System.Windows.Forms.Label();
+            this.swapStatsPendingB_lbl = new System.Windows.Forms.Label();
+            this.label47 = new System.Windows.Forms.Label();
+            this.swapStatsPendingA_lbl = new System.Windows.Forms.Label();
+            this.label41 = new System.Windows.Forms.Label();
+            this.swapStatsTXRate_lbl = new System.Windows.Forms.Label();
+            this.label38 = new System.Windows.Forms.Label();
+            this.swapStatsTestDuration_lbl = new System.Windows.Forms.Label();
+            this.label35 = new System.Windows.Forms.Label();
+            this.swapStatsTXFails_lbl = new System.Windows.Forms.Label();
+            this.label31 = new System.Windows.Forms.Label();
+            this.swapStatsTotalTX_lbl = new System.Windows.Forms.Label();
+            this.label27 = new System.Windows.Forms.Label();
+            this.swapStatsTxCountBA_lbl = new System.Windows.Forms.Label();
+            this.label23 = new System.Windows.Forms.Label();
+            this.swapStatsTxCountAB_lbl = new System.Windows.Forms.Label();
+            this.groupBox14 = new System.Windows.Forms.GroupBox();
+            this.label42 = new System.Windows.Forms.Label();
+            this.swaptestActBalA_lbl = new System.Windows.Forms.Label();
+            this.swaptestActBalB_lbl = new System.Windows.Forms.Label();
+            this.label45 = new System.Windows.Forms.Label();
+            this.label28 = new System.Windows.Forms.Label();
+            this.swaptestExpBalA_lbl = new System.Windows.Forms.Label();
+            this.swaptestExpBalB_lbl = new System.Windows.Forms.Label();
+            this.label34 = new System.Windows.Forms.Label();
+            this.label24 = new System.Windows.Forms.Label();
+            this.swaptestIncomingB_lbl = new System.Windows.Forms.Label();
+            this.label40 = new System.Windows.Forms.Label();
+            this.swaptestIncomingA_lbl = new System.Windows.Forms.Label();
+            this.lbl5 = new System.Windows.Forms.Label();
+            this.label26 = new System.Windows.Forms.Label();
+            this.swaptestSentB_lbl = new System.Windows.Forms.Label();
+            this.label36 = new System.Windows.Forms.Label();
+            this.swaptestSentA_lbl = new System.Windows.Forms.Label();
+            this.label30 = new System.Windows.Forms.Label();
+            this.swaptestFeesB_lbl = new System.Windows.Forms.Label();
+            this.label32 = new System.Windows.Forms.Label();
+            this.swaptestFeesA_lbl = new System.Windows.Forms.Label();
+            this.swaptestStartBalB_lbl = new System.Windows.Forms.Label();
+            this.label22 = new System.Windows.Forms.Label();
+            this.swaptestStartBalA_lbl = new System.Windows.Forms.Label();
+            this.label21 = new System.Windows.Forms.Label();
+            this.swapAccountB_CB = new System.Windows.Forms.ComboBox();
+            this.label17 = new System.Windows.Forms.Label();
+            this.swapAccountA_CB = new System.Windows.Forms.ComboBox();
+            this.label14 = new System.Windows.Forms.Label();
             this.pubkeyTB = new System.Windows.Forms.TextBox();
             this.label12 = new System.Windows.Forms.Label();
             this.accountTB = new System.Windows.Forms.TextBox();
@@ -153,6 +209,11 @@ namespace ExscudoTestnetGUI
             ((System.ComponentModel.ISupportInitialize)(this.rootIntervalNM)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.rootThreadsNM)).BeginInit();
             this.logTab.SuspendLayout();
+            this.testTab.SuspendLayout();
+            this.groupBox13.SuspendLayout();
+            this.groupBox16.SuspendLayout();
+            this.groupBox15.SuspendLayout();
+            this.groupBox14.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
@@ -213,6 +274,7 @@ namespace ExscudoTestnetGUI
             this.tabControl1.Controls.Add(this.tranactionsTab);
             this.tabControl1.Controls.Add(this.configTab);
             this.tabControl1.Controls.Add(this.logTab);
+            this.tabControl1.Controls.Add(this.testTab);
             this.tabControl1.Location = new System.Drawing.Point(11, 92);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
@@ -1016,6 +1078,684 @@ namespace ExscudoTestnetGUI
             this.logTB.Size = new System.Drawing.Size(1486, 971);
             this.logTB.TabIndex = 8;
             // 
+            // testTab
+            // 
+            this.testTab.Controls.Add(this.groupBox13);
+            this.testTab.ForeColor = System.Drawing.Color.RoyalBlue;
+            this.testTab.Location = new System.Drawing.Point(4, 29);
+            this.testTab.Name = "testTab";
+            this.testTab.Size = new System.Drawing.Size(1517, 1059);
+            this.testTab.TabIndex = 4;
+            this.testTab.Text = "Test Tools";
+            this.testTab.UseVisualStyleBackColor = true;
+            // 
+            // groupBox13
+            // 
+            this.groupBox13.Controls.Add(this.groupBox16);
+            this.groupBox13.Controls.Add(this.groupBox15);
+            this.groupBox13.Controls.Add(this.groupBox14);
+            this.groupBox13.Controls.Add(this.label24);
+            this.groupBox13.Controls.Add(this.swaptestIncomingB_lbl);
+            this.groupBox13.Controls.Add(this.label40);
+            this.groupBox13.Controls.Add(this.swaptestIncomingA_lbl);
+            this.groupBox13.Controls.Add(this.lbl5);
+            this.groupBox13.Controls.Add(this.label26);
+            this.groupBox13.Controls.Add(this.swaptestSentB_lbl);
+            this.groupBox13.Controls.Add(this.label36);
+            this.groupBox13.Controls.Add(this.swaptestSentA_lbl);
+            this.groupBox13.Controls.Add(this.label30);
+            this.groupBox13.Controls.Add(this.swaptestFeesB_lbl);
+            this.groupBox13.Controls.Add(this.label32);
+            this.groupBox13.Controls.Add(this.swaptestFeesA_lbl);
+            this.groupBox13.Controls.Add(this.swaptestStartBalB_lbl);
+            this.groupBox13.Controls.Add(this.label22);
+            this.groupBox13.Controls.Add(this.swaptestStartBalA_lbl);
+            this.groupBox13.Controls.Add(this.label21);
+            this.groupBox13.Controls.Add(this.swapAccountB_CB);
+            this.groupBox13.Controls.Add(this.label17);
+            this.groupBox13.Controls.Add(this.swapAccountA_CB);
+            this.groupBox13.Controls.Add(this.label14);
+            this.groupBox13.ForeColor = System.Drawing.Color.Black;
+            this.groupBox13.Location = new System.Drawing.Point(264, 23);
+            this.groupBox13.Name = "groupBox13";
+            this.groupBox13.Size = new System.Drawing.Size(947, 940);
+            this.groupBox13.TabIndex = 0;
+            this.groupBox13.TabStop = false;
+            this.groupBox13.Text = "Swap-transaction generator";
+            // 
+            // groupBox16
+            // 
+            this.groupBox16.Controls.Add(this.label29);
+            this.groupBox16.Controls.Add(this.label25);
+            this.groupBox16.Controls.Add(this.swapTestTxSize);
+            this.groupBox16.Controls.Add(this.swapTestStop_BTN);
+            this.groupBox16.Controls.Add(this.swapTestReset_BTN);
+            this.groupBox16.Controls.Add(this.swapTestStart_BTN);
+            this.groupBox16.Location = new System.Drawing.Point(10, 660);
+            this.groupBox16.Name = "groupBox16";
+            this.groupBox16.Size = new System.Drawing.Size(918, 192);
+            this.groupBox16.TabIndex = 32;
+            this.groupBox16.TabStop = false;
+            this.groupBox16.Text = "Control";
+            // 
+            // label29
+            // 
+            this.label29.AutoSize = true;
+            this.label29.Location = new System.Drawing.Point(261, 38);
+            this.label29.Name = "label29";
+            this.label29.Size = new System.Drawing.Size(43, 20);
+            this.label29.TabIndex = 34;
+            this.label29.Text = "EON";
+            // 
+            // label25
+            // 
+            this.label25.AutoSize = true;
+            this.label25.Location = new System.Drawing.Point(29, 37);
+            this.label25.Name = "label25";
+            this.label25.Size = new System.Drawing.Size(124, 20);
+            this.label25.TabIndex = 33;
+            this.label25.Text = "Transaction size";
+            // 
+            // swapTestTxSize
+            // 
+            this.swapTestTxSize.Location = new System.Drawing.Point(159, 35);
+            this.swapTestTxSize.Name = "swapTestTxSize";
+            this.swapTestTxSize.Size = new System.Drawing.Size(96, 26);
+            this.swapTestTxSize.TabIndex = 32;
+            this.swapTestTxSize.Text = "0.01";
+            this.swapTestTxSize.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.swapTestTxSize.TextChanged += new System.EventHandler(this.SwapTestTxSize_TextChanged);
+            // 
+            // swapTestStop_BTN
+            // 
+            this.swapTestStop_BTN.ForeColor = System.Drawing.Color.Black;
+            this.swapTestStop_BTN.Location = new System.Drawing.Point(713, 89);
+            this.swapTestStop_BTN.Name = "swapTestStop_BTN";
+            this.swapTestStop_BTN.Size = new System.Drawing.Size(162, 37);
+            this.swapTestStop_BTN.TabIndex = 6;
+            this.swapTestStop_BTN.Text = "Stop";
+            this.swapTestStop_BTN.UseVisualStyleBackColor = true;
+            this.swapTestStop_BTN.Click += new System.EventHandler(this.SwapTestStop_BTN_Click);
+            // 
+            // swapTestReset_BTN
+            // 
+            this.swapTestReset_BTN.ForeColor = System.Drawing.Color.Black;
+            this.swapTestReset_BTN.Location = new System.Drawing.Point(783, 135);
+            this.swapTestReset_BTN.Name = "swapTestReset_BTN";
+            this.swapTestReset_BTN.Size = new System.Drawing.Size(92, 37);
+            this.swapTestReset_BTN.TabIndex = 31;
+            this.swapTestReset_BTN.Text = "Reset";
+            this.swapTestReset_BTN.UseVisualStyleBackColor = true;
+            this.swapTestReset_BTN.Click += new System.EventHandler(this.SwapTestReset_BTN_Click);
+            // 
+            // swapTestStart_BTN
+            // 
+            this.swapTestStart_BTN.ForeColor = System.Drawing.Color.Black;
+            this.swapTestStart_BTN.Location = new System.Drawing.Point(713, 46);
+            this.swapTestStart_BTN.Name = "swapTestStart_BTN";
+            this.swapTestStart_BTN.Size = new System.Drawing.Size(162, 37);
+            this.swapTestStart_BTN.TabIndex = 5;
+            this.swapTestStart_BTN.Text = "Start";
+            this.swapTestStart_BTN.UseVisualStyleBackColor = true;
+            this.swapTestStart_BTN.Click += new System.EventHandler(this.SwapTestStart_BTN_Click);
+            // 
+            // groupBox15
+            // 
+            this.groupBox15.Controls.Add(this.label44);
+            this.groupBox15.Controls.Add(this.swapStatsPendingB_lbl);
+            this.groupBox15.Controls.Add(this.label47);
+            this.groupBox15.Controls.Add(this.swapStatsPendingA_lbl);
+            this.groupBox15.Controls.Add(this.label41);
+            this.groupBox15.Controls.Add(this.swapStatsTXRate_lbl);
+            this.groupBox15.Controls.Add(this.label38);
+            this.groupBox15.Controls.Add(this.swapStatsTestDuration_lbl);
+            this.groupBox15.Controls.Add(this.label35);
+            this.groupBox15.Controls.Add(this.swapStatsTXFails_lbl);
+            this.groupBox15.Controls.Add(this.label31);
+            this.groupBox15.Controls.Add(this.swapStatsTotalTX_lbl);
+            this.groupBox15.Controls.Add(this.label27);
+            this.groupBox15.Controls.Add(this.swapStatsTxCountBA_lbl);
+            this.groupBox15.Controls.Add(this.label23);
+            this.groupBox15.Controls.Add(this.swapStatsTxCountAB_lbl);
+            this.groupBox15.Location = new System.Drawing.Point(10, 462);
+            this.groupBox15.Name = "groupBox15";
+            this.groupBox15.Size = new System.Drawing.Size(922, 192);
+            this.groupBox15.TabIndex = 30;
+            this.groupBox15.TabStop = false;
+            this.groupBox15.Text = "Stats";
+            // 
+            // label44
+            // 
+            this.label44.AutoSize = true;
+            this.label44.Enabled = false;
+            this.label44.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label44.ForeColor = System.Drawing.Color.Black;
+            this.label44.Location = new System.Drawing.Point(79, 148);
+            this.label44.Name = "label44";
+            this.label44.Size = new System.Drawing.Size(176, 25);
+            this.label44.TabIndex = 39;
+            this.label44.Text = "Pending Tx\'s to B :";
+            this.label44.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // swapStatsPendingB_lbl
+            // 
+            this.swapStatsPendingB_lbl.Enabled = false;
+            this.swapStatsPendingB_lbl.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.swapStatsPendingB_lbl.ForeColor = System.Drawing.Color.Black;
+            this.swapStatsPendingB_lbl.Location = new System.Drawing.Point(270, 144);
+            this.swapStatsPendingB_lbl.Name = "swapStatsPendingB_lbl";
+            this.swapStatsPendingB_lbl.Size = new System.Drawing.Size(144, 32);
+            this.swapStatsPendingB_lbl.TabIndex = 38;
+            this.swapStatsPendingB_lbl.Text = "-";
+            this.swapStatsPendingB_lbl.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // label47
+            // 
+            this.label47.AutoSize = true;
+            this.label47.Enabled = false;
+            this.label47.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label47.ForeColor = System.Drawing.Color.Black;
+            this.label47.Location = new System.Drawing.Point(78, 113);
+            this.label47.Name = "label47";
+            this.label47.Size = new System.Drawing.Size(177, 25);
+            this.label47.TabIndex = 37;
+            this.label47.Text = "Pending Tx\'s to A :";
+            this.label47.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // swapStatsPendingA_lbl
+            // 
+            this.swapStatsPendingA_lbl.Enabled = false;
+            this.swapStatsPendingA_lbl.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.swapStatsPendingA_lbl.ForeColor = System.Drawing.Color.Black;
+            this.swapStatsPendingA_lbl.Location = new System.Drawing.Point(270, 109);
+            this.swapStatsPendingA_lbl.Name = "swapStatsPendingA_lbl";
+            this.swapStatsPendingA_lbl.Size = new System.Drawing.Size(144, 32);
+            this.swapStatsPendingA_lbl.TabIndex = 36;
+            this.swapStatsPendingA_lbl.Text = "-";
+            this.swapStatsPendingA_lbl.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // label41
+            // 
+            this.label41.AutoSize = true;
+            this.label41.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label41.ForeColor = System.Drawing.Color.Black;
+            this.label41.Location = new System.Drawing.Point(495, 142);
+            this.label41.Name = "label41";
+            this.label41.Size = new System.Drawing.Size(220, 25);
+            this.label41.TabIndex = 35;
+            this.label41.Text = "Transactions / Second :";
+            this.label41.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // swapStatsTXRate_lbl
+            // 
+            this.swapStatsTXRate_lbl.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.swapStatsTXRate_lbl.ForeColor = System.Drawing.Color.Black;
+            this.swapStatsTXRate_lbl.Location = new System.Drawing.Point(731, 139);
+            this.swapStatsTXRate_lbl.Name = "swapStatsTXRate_lbl";
+            this.swapStatsTXRate_lbl.Size = new System.Drawing.Size(197, 32);
+            this.swapStatsTXRate_lbl.TabIndex = 34;
+            this.swapStatsTXRate_lbl.Text = "-";
+            this.swapStatsTXRate_lbl.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // label38
+            // 
+            this.label38.AutoSize = true;
+            this.label38.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label38.ForeColor = System.Drawing.Color.Black;
+            this.label38.Location = new System.Drawing.Point(575, 109);
+            this.label38.Name = "label38";
+            this.label38.Size = new System.Drawing.Size(140, 25);
+            this.label38.TabIndex = 33;
+            this.label38.Text = "Test Duration :";
+            this.label38.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // swapStatsTestDuration_lbl
+            // 
+            this.swapStatsTestDuration_lbl.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.swapStatsTestDuration_lbl.ForeColor = System.Drawing.Color.Black;
+            this.swapStatsTestDuration_lbl.Location = new System.Drawing.Point(731, 107);
+            this.swapStatsTestDuration_lbl.Name = "swapStatsTestDuration_lbl";
+            this.swapStatsTestDuration_lbl.Size = new System.Drawing.Size(197, 32);
+            this.swapStatsTestDuration_lbl.TabIndex = 32;
+            this.swapStatsTestDuration_lbl.Text = "-";
+            this.swapStatsTestDuration_lbl.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // label35
+            // 
+            this.label35.AutoSize = true;
+            this.label35.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label35.ForeColor = System.Drawing.Color.Black;
+            this.label35.Location = new System.Drawing.Point(501, 70);
+            this.label35.Name = "label35";
+            this.label35.Size = new System.Drawing.Size(210, 25);
+            this.label35.TabIndex = 31;
+            this.label35.Text = "Transactions Failures :";
+            this.label35.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // swapStatsTXFails_lbl
+            // 
+            this.swapStatsTXFails_lbl.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.swapStatsTXFails_lbl.ForeColor = System.Drawing.Color.Black;
+            this.swapStatsTXFails_lbl.Location = new System.Drawing.Point(731, 69);
+            this.swapStatsTXFails_lbl.Name = "swapStatsTXFails_lbl";
+            this.swapStatsTXFails_lbl.Size = new System.Drawing.Size(144, 32);
+            this.swapStatsTXFails_lbl.TabIndex = 30;
+            this.swapStatsTXFails_lbl.Text = "-";
+            this.swapStatsTXFails_lbl.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // label31
+            // 
+            this.label31.AutoSize = true;
+            this.label31.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label31.ForeColor = System.Drawing.Color.Black;
+            this.label31.Location = new System.Drawing.Point(528, 35);
+            this.label31.Name = "label31";
+            this.label31.Size = new System.Drawing.Size(185, 25);
+            this.label31.TabIndex = 29;
+            this.label31.Text = "Total Transactions :";
+            this.label31.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // swapStatsTotalTX_lbl
+            // 
+            this.swapStatsTotalTX_lbl.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.swapStatsTotalTX_lbl.ForeColor = System.Drawing.Color.Black;
+            this.swapStatsTotalTX_lbl.Location = new System.Drawing.Point(731, 33);
+            this.swapStatsTotalTX_lbl.Name = "swapStatsTotalTX_lbl";
+            this.swapStatsTotalTX_lbl.Size = new System.Drawing.Size(144, 32);
+            this.swapStatsTotalTX_lbl.TabIndex = 28;
+            this.swapStatsTotalTX_lbl.Text = "-";
+            this.swapStatsTotalTX_lbl.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // label27
+            // 
+            this.label27.AutoSize = true;
+            this.label27.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label27.ForeColor = System.Drawing.Color.Black;
+            this.label27.Location = new System.Drawing.Point(5, 74);
+            this.label27.Name = "label27";
+            this.label27.Size = new System.Drawing.Size(243, 25);
+            this.label27.TabIndex = 27;
+            this.label27.Text = "Transactions count B > A :";
+            this.label27.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // swapStatsTxCountBA_lbl
+            // 
+            this.swapStatsTxCountBA_lbl.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.swapStatsTxCountBA_lbl.ForeColor = System.Drawing.Color.Black;
+            this.swapStatsTxCountBA_lbl.Location = new System.Drawing.Point(270, 72);
+            this.swapStatsTxCountBA_lbl.Name = "swapStatsTxCountBA_lbl";
+            this.swapStatsTxCountBA_lbl.Size = new System.Drawing.Size(144, 32);
+            this.swapStatsTxCountBA_lbl.TabIndex = 26;
+            this.swapStatsTxCountBA_lbl.Text = "-";
+            this.swapStatsTxCountBA_lbl.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // label23
+            // 
+            this.label23.AutoSize = true;
+            this.label23.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label23.ForeColor = System.Drawing.Color.Black;
+            this.label23.Location = new System.Drawing.Point(5, 38);
+            this.label23.Name = "label23";
+            this.label23.Size = new System.Drawing.Size(243, 25);
+            this.label23.TabIndex = 25;
+            this.label23.Text = "Transactions count A > B :";
+            this.label23.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // swapStatsTxCountAB_lbl
+            // 
+            this.swapStatsTxCountAB_lbl.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.swapStatsTxCountAB_lbl.ForeColor = System.Drawing.Color.Black;
+            this.swapStatsTxCountAB_lbl.Location = new System.Drawing.Point(270, 36);
+            this.swapStatsTxCountAB_lbl.Name = "swapStatsTxCountAB_lbl";
+            this.swapStatsTxCountAB_lbl.Size = new System.Drawing.Size(144, 32);
+            this.swapStatsTxCountAB_lbl.TabIndex = 24;
+            this.swapStatsTxCountAB_lbl.Text = "-";
+            this.swapStatsTxCountAB_lbl.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // groupBox14
+            // 
+            this.groupBox14.Controls.Add(this.label42);
+            this.groupBox14.Controls.Add(this.swaptestActBalA_lbl);
+            this.groupBox14.Controls.Add(this.swaptestActBalB_lbl);
+            this.groupBox14.Controls.Add(this.label45);
+            this.groupBox14.Controls.Add(this.label28);
+            this.groupBox14.Controls.Add(this.swaptestExpBalA_lbl);
+            this.groupBox14.Controls.Add(this.swaptestExpBalB_lbl);
+            this.groupBox14.Controls.Add(this.label34);
+            this.groupBox14.Location = new System.Drawing.Point(10, 333);
+            this.groupBox14.Name = "groupBox14";
+            this.groupBox14.Size = new System.Drawing.Size(922, 112);
+            this.groupBox14.TabIndex = 29;
+            this.groupBox14.TabStop = false;
+            // 
+            // label42
+            // 
+            this.label42.AutoSize = true;
+            this.label42.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label42.ForeColor = System.Drawing.Color.Black;
+            this.label42.Location = new System.Drawing.Point(70, 60);
+            this.label42.Name = "label42";
+            this.label42.Size = new System.Drawing.Size(181, 29);
+            this.label42.TabIndex = 21;
+            this.label42.Text = "Actual balance :";
+            this.label42.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // swaptestActBalA_lbl
+            // 
+            this.swaptestActBalA_lbl.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.swaptestActBalA_lbl.ForeColor = System.Drawing.Color.Black;
+            this.swaptestActBalA_lbl.Location = new System.Drawing.Point(256, 61);
+            this.swaptestActBalA_lbl.Name = "swaptestActBalA_lbl";
+            this.swaptestActBalA_lbl.Size = new System.Drawing.Size(144, 32);
+            this.swaptestActBalA_lbl.TabIndex = 20;
+            this.swaptestActBalA_lbl.Text = "-";
+            this.swaptestActBalA_lbl.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // swaptestActBalB_lbl
+            // 
+            this.swaptestActBalB_lbl.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.swaptestActBalB_lbl.ForeColor = System.Drawing.Color.Black;
+            this.swaptestActBalB_lbl.Location = new System.Drawing.Point(754, 61);
+            this.swaptestActBalB_lbl.Name = "swaptestActBalB_lbl";
+            this.swaptestActBalB_lbl.Size = new System.Drawing.Size(144, 32);
+            this.swaptestActBalB_lbl.TabIndex = 22;
+            this.swaptestActBalB_lbl.Text = "-";
+            this.swaptestActBalB_lbl.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // label45
+            // 
+            this.label45.AutoSize = true;
+            this.label45.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label45.ForeColor = System.Drawing.Color.Black;
+            this.label45.Location = new System.Drawing.Point(564, 60);
+            this.label45.Name = "label45";
+            this.label45.Size = new System.Drawing.Size(181, 29);
+            this.label45.TabIndex = 23;
+            this.label45.Text = "Actual balance :";
+            this.label45.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // label28
+            // 
+            this.label28.AutoSize = true;
+            this.label28.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label28.ForeColor = System.Drawing.Color.DarkGoldenrod;
+            this.label28.Location = new System.Drawing.Point(34, 21);
+            this.label28.Name = "label28";
+            this.label28.Size = new System.Drawing.Size(217, 29);
+            this.label28.TabIndex = 12;
+            this.label28.Text = "Expected balance :";
+            this.label28.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // swaptestExpBalA_lbl
+            // 
+            this.swaptestExpBalA_lbl.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.swaptestExpBalA_lbl.ForeColor = System.Drawing.Color.DarkGoldenrod;
+            this.swaptestExpBalA_lbl.Location = new System.Drawing.Point(257, 22);
+            this.swaptestExpBalA_lbl.Name = "swaptestExpBalA_lbl";
+            this.swaptestExpBalA_lbl.Size = new System.Drawing.Size(144, 32);
+            this.swaptestExpBalA_lbl.TabIndex = 11;
+            this.swaptestExpBalA_lbl.Text = "-";
+            this.swaptestExpBalA_lbl.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // swaptestExpBalB_lbl
+            // 
+            this.swaptestExpBalB_lbl.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.swaptestExpBalB_lbl.ForeColor = System.Drawing.Color.DarkGoldenrod;
+            this.swaptestExpBalB_lbl.Location = new System.Drawing.Point(755, 22);
+            this.swaptestExpBalB_lbl.Name = "swaptestExpBalB_lbl";
+            this.swaptestExpBalB_lbl.Size = new System.Drawing.Size(144, 32);
+            this.swaptestExpBalB_lbl.TabIndex = 13;
+            this.swaptestExpBalB_lbl.Text = "-";
+            this.swaptestExpBalB_lbl.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // label34
+            // 
+            this.label34.AutoSize = true;
+            this.label34.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label34.ForeColor = System.Drawing.Color.DarkGoldenrod;
+            this.label34.Location = new System.Drawing.Point(528, 22);
+            this.label34.Name = "label34";
+            this.label34.Size = new System.Drawing.Size(217, 29);
+            this.label34.TabIndex = 19;
+            this.label34.Text = "Expected balance :";
+            this.label34.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // label24
+            // 
+            this.label24.AutoSize = true;
+            this.label24.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label24.ForeColor = System.Drawing.Color.ForestGreen;
+            this.label24.Location = new System.Drawing.Point(613, 292);
+            this.label24.Name = "label24";
+            this.label24.Size = new System.Drawing.Size(144, 29);
+            this.label24.TabIndex = 28;
+            this.label24.Text = "+ Returned :";
+            this.label24.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // swaptestIncomingB_lbl
+            // 
+            this.swaptestIncomingB_lbl.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.swaptestIncomingB_lbl.ForeColor = System.Drawing.Color.ForestGreen;
+            this.swaptestIncomingB_lbl.Location = new System.Drawing.Point(764, 292);
+            this.swaptestIncomingB_lbl.Name = "swaptestIncomingB_lbl";
+            this.swaptestIncomingB_lbl.Size = new System.Drawing.Size(144, 32);
+            this.swaptestIncomingB_lbl.TabIndex = 27;
+            this.swaptestIncomingB_lbl.Text = "-";
+            this.swaptestIncomingB_lbl.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // label40
+            // 
+            this.label40.AutoSize = true;
+            this.label40.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label40.ForeColor = System.Drawing.Color.ForestGreen;
+            this.label40.Location = new System.Drawing.Point(121, 292);
+            this.label40.Name = "label40";
+            this.label40.Size = new System.Drawing.Size(144, 29);
+            this.label40.TabIndex = 26;
+            this.label40.Text = "+ Returned :";
+            this.label40.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // swaptestIncomingA_lbl
+            // 
+            this.swaptestIncomingA_lbl.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.swaptestIncomingA_lbl.ForeColor = System.Drawing.Color.ForestGreen;
+            this.swaptestIncomingA_lbl.Location = new System.Drawing.Point(266, 294);
+            this.swaptestIncomingA_lbl.Name = "swaptestIncomingA_lbl";
+            this.swaptestIncomingA_lbl.Size = new System.Drawing.Size(144, 32);
+            this.swaptestIncomingA_lbl.TabIndex = 25;
+            this.swaptestIncomingA_lbl.Text = "-";
+            this.swaptestIncomingA_lbl.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // lbl5
+            // 
+            this.lbl5.AutoSize = true;
+            this.lbl5.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbl5.ForeColor = System.Drawing.Color.RoyalBlue;
+            this.lbl5.Location = new System.Drawing.Point(556, 184);
+            this.lbl5.Name = "lbl5";
+            this.lbl5.Size = new System.Drawing.Size(200, 29);
+            this.lbl5.TabIndex = 24;
+            this.lbl5.Text = "Starting Balance :";
+            this.lbl5.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // label26
+            // 
+            this.label26.AutoSize = true;
+            this.label26.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label26.ForeColor = System.Drawing.Color.Red;
+            this.label26.Location = new System.Drawing.Point(668, 221);
+            this.label26.Name = "label26";
+            this.label26.Size = new System.Drawing.Size(88, 29);
+            this.label26.TabIndex = 23;
+            this.label26.Text = "- Sent :";
+            this.label26.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // swaptestSentB_lbl
+            // 
+            this.swaptestSentB_lbl.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.swaptestSentB_lbl.ForeColor = System.Drawing.Color.Red;
+            this.swaptestSentB_lbl.Location = new System.Drawing.Point(764, 221);
+            this.swaptestSentB_lbl.Name = "swaptestSentB_lbl";
+            this.swaptestSentB_lbl.Size = new System.Drawing.Size(144, 32);
+            this.swaptestSentB_lbl.TabIndex = 22;
+            this.swaptestSentB_lbl.Text = "-";
+            this.swaptestSentB_lbl.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // label36
+            // 
+            this.label36.AutoSize = true;
+            this.label36.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label36.ForeColor = System.Drawing.Color.Red;
+            this.label36.Location = new System.Drawing.Point(174, 221);
+            this.label36.Name = "label36";
+            this.label36.Size = new System.Drawing.Size(88, 29);
+            this.label36.TabIndex = 21;
+            this.label36.Text = "- Sent :";
+            this.label36.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // swaptestSentA_lbl
+            // 
+            this.swaptestSentA_lbl.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.swaptestSentA_lbl.ForeColor = System.Drawing.Color.Red;
+            this.swaptestSentA_lbl.Location = new System.Drawing.Point(266, 221);
+            this.swaptestSentA_lbl.Name = "swaptestSentA_lbl";
+            this.swaptestSentA_lbl.Size = new System.Drawing.Size(144, 32);
+            this.swaptestSentA_lbl.TabIndex = 20;
+            this.swaptestSentA_lbl.Text = "-";
+            this.swaptestSentA_lbl.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // label30
+            // 
+            this.label30.AutoSize = true;
+            this.label30.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label30.ForeColor = System.Drawing.Color.Red;
+            this.label30.Location = new System.Drawing.Point(664, 253);
+            this.label30.Name = "label30";
+            this.label30.Size = new System.Drawing.Size(94, 29);
+            this.label30.TabIndex = 18;
+            this.label30.Text = "- Fees :";
+            this.label30.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // swaptestFeesB_lbl
+            // 
+            this.swaptestFeesB_lbl.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.swaptestFeesB_lbl.ForeColor = System.Drawing.Color.Red;
+            this.swaptestFeesB_lbl.Location = new System.Drawing.Point(765, 253);
+            this.swaptestFeesB_lbl.Name = "swaptestFeesB_lbl";
+            this.swaptestFeesB_lbl.Size = new System.Drawing.Size(144, 32);
+            this.swaptestFeesB_lbl.TabIndex = 17;
+            this.swaptestFeesB_lbl.Text = "-";
+            this.swaptestFeesB_lbl.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // label32
+            // 
+            this.label32.AutoSize = true;
+            this.label32.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label32.ForeColor = System.Drawing.Color.Red;
+            this.label32.Location = new System.Drawing.Point(170, 253);
+            this.label32.Name = "label32";
+            this.label32.Size = new System.Drawing.Size(94, 29);
+            this.label32.TabIndex = 16;
+            this.label32.Text = "- Fees :";
+            this.label32.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // swaptestFeesA_lbl
+            // 
+            this.swaptestFeesA_lbl.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.swaptestFeesA_lbl.ForeColor = System.Drawing.Color.Red;
+            this.swaptestFeesA_lbl.Location = new System.Drawing.Point(266, 253);
+            this.swaptestFeesA_lbl.Name = "swaptestFeesA_lbl";
+            this.swaptestFeesA_lbl.Size = new System.Drawing.Size(144, 32);
+            this.swaptestFeesA_lbl.TabIndex = 15;
+            this.swaptestFeesA_lbl.Text = "-";
+            this.swaptestFeesA_lbl.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // swaptestStartBalB_lbl
+            // 
+            this.swaptestStartBalB_lbl.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.swaptestStartBalB_lbl.ForeColor = System.Drawing.Color.RoyalBlue;
+            this.swaptestStartBalB_lbl.Location = new System.Drawing.Point(765, 184);
+            this.swaptestStartBalB_lbl.Name = "swaptestStartBalB_lbl";
+            this.swaptestStartBalB_lbl.Size = new System.Drawing.Size(144, 32);
+            this.swaptestStartBalB_lbl.TabIndex = 9;
+            this.swaptestStartBalB_lbl.Text = "-";
+            this.swaptestStartBalB_lbl.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // label22
+            // 
+            this.label22.AutoSize = true;
+            this.label22.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label22.ForeColor = System.Drawing.Color.RoyalBlue;
+            this.label22.Location = new System.Drawing.Point(64, 184);
+            this.label22.Name = "label22";
+            this.label22.Size = new System.Drawing.Size(200, 29);
+            this.label22.TabIndex = 8;
+            this.label22.Text = "Starting Balance :";
+            this.label22.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // swaptestStartBalA_lbl
+            // 
+            this.swaptestStartBalA_lbl.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.swaptestStartBalA_lbl.ForeColor = System.Drawing.Color.RoyalBlue;
+            this.swaptestStartBalA_lbl.Location = new System.Drawing.Point(266, 184);
+            this.swaptestStartBalA_lbl.Name = "swaptestStartBalA_lbl";
+            this.swaptestStartBalA_lbl.Size = new System.Drawing.Size(144, 32);
+            this.swaptestStartBalA_lbl.TabIndex = 7;
+            this.swaptestStartBalA_lbl.Text = "-";
+            this.swaptestStartBalA_lbl.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // label21
+            // 
+            this.label21.AutoSize = true;
+            this.label21.ForeColor = System.Drawing.Color.Black;
+            this.label21.Location = new System.Drawing.Point(677, 100);
+            this.label21.Name = "label21";
+            this.label21.Size = new System.Drawing.Size(83, 20);
+            this.label21.TabIndex = 4;
+            this.label21.Text = "Account B";
+            // 
+            // swapAccountB_CB
+            // 
+            this.swapAccountB_CB.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.swapAccountB_CB.ForeColor = System.Drawing.Color.Black;
+            this.swapAccountB_CB.FormattingEnabled = true;
+            this.swapAccountB_CB.Location = new System.Drawing.Point(526, 123);
+            this.swapAccountB_CB.Name = "swapAccountB_CB";
+            this.swapAccountB_CB.Size = new System.Drawing.Size(385, 28);
+            this.swapAccountB_CB.TabIndex = 3;
+            this.swapAccountB_CB.SelectedIndexChanged += new System.EventHandler(this.SwapAccountB_CB_SelectedIndexChanged);
+            // 
+            // label17
+            // 
+            this.label17.AutoSize = true;
+            this.label17.ForeColor = System.Drawing.Color.Black;
+            this.label17.Location = new System.Drawing.Point(176, 100);
+            this.label17.Name = "label17";
+            this.label17.Size = new System.Drawing.Size(83, 20);
+            this.label17.TabIndex = 2;
+            this.label17.Text = "Account A";
+            // 
+            // swapAccountA_CB
+            // 
+            this.swapAccountA_CB.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.swapAccountA_CB.ForeColor = System.Drawing.Color.Black;
+            this.swapAccountA_CB.FormattingEnabled = true;
+            this.swapAccountA_CB.Location = new System.Drawing.Point(25, 123);
+            this.swapAccountA_CB.Name = "swapAccountA_CB";
+            this.swapAccountA_CB.Size = new System.Drawing.Size(385, 28);
+            this.swapAccountA_CB.TabIndex = 1;
+            this.swapAccountA_CB.SelectedIndexChanged += new System.EventHandler(this.SwapAccountA_CB_SelectedIndexChanged);
+            // 
+            // label14
+            // 
+            this.label14.AutoSize = true;
+            this.label14.ForeColor = System.Drawing.Color.Black;
+            this.label14.Location = new System.Drawing.Point(21, 41);
+            this.label14.Name = "label14";
+            this.label14.Size = new System.Drawing.Size(581, 20);
+            this.label14.TabIndex = 0;
+            this.label14.Text = "Schedules continuous bidirectional  streams of payments between two accounts. ";
+            // 
             // pubkeyTB
             // 
             this.pubkeyTB.Location = new System.Drawing.Point(906, 13);
@@ -1222,6 +1962,15 @@ namespace ExscudoTestnetGUI
             ((System.ComponentModel.ISupportInitialize)(this.rootThreadsNM)).EndInit();
             this.logTab.ResumeLayout(false);
             this.logTab.PerformLayout();
+            this.testTab.ResumeLayout(false);
+            this.groupBox13.ResumeLayout(false);
+            this.groupBox13.PerformLayout();
+            this.groupBox16.ResumeLayout(false);
+            this.groupBox16.PerformLayout();
+            this.groupBox15.ResumeLayout(false);
+            this.groupBox15.PerformLayout();
+            this.groupBox14.ResumeLayout(false);
+            this.groupBox14.PerformLayout();
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.panel1.ResumeLayout(false);
@@ -1328,6 +2077,62 @@ namespace ExscudoTestnetGUI
         private ToolStripMenuItem resetAllConfigToolStripMenuItem;
         private Button createAccountBTN;
         private OLVColumn senderColumn;
+        private TabPage testTab;
+        private GroupBox groupBox13;
+        private ComboBox swapAccountA_CB;
+        private Label label14;
+        private Button swapTestStop_BTN;
+        private Button swapTestStart_BTN;
+        private Label label21;
+        private ComboBox swapAccountB_CB;
+        private Label label17;
+        private GroupBox groupBox14;
+        private Label label42;
+        private Label swaptestActBalA_lbl;
+        private Label swaptestActBalB_lbl;
+        private Label label45;
+        private Label label28;
+        private Label swaptestExpBalA_lbl;
+        private Label swaptestExpBalB_lbl;
+        private Label label34;
+        private Label label24;
+        private Label swaptestIncomingB_lbl;
+        private Label label40;
+        private Label swaptestIncomingA_lbl;
+        private Label lbl5;
+        private Label label26;
+        private Label swaptestSentB_lbl;
+        private Label label36;
+        private Label swaptestSentA_lbl;
+        private Label label30;
+        private Label swaptestFeesB_lbl;
+        private Label label32;
+        private Label swaptestFeesA_lbl;
+        private Label swaptestStartBalB_lbl;
+        private Label label22;
+        private Label swaptestStartBalA_lbl;
+        private Button swapTestReset_BTN;
+        private GroupBox groupBox15;
+        private Label label44;
+        private Label swapStatsPendingB_lbl;
+        private Label label47;
+        private Label swapStatsPendingA_lbl;
+        private Label label41;
+        private Label swapStatsTXRate_lbl;
+        private Label label38;
+        private Label swapStatsTestDuration_lbl;
+        private Label label35;
+        private Label swapStatsTXFails_lbl;
+        private Label label31;
+        private Label swapStatsTotalTX_lbl;
+        private Label label27;
+        private Label swapStatsTxCountBA_lbl;
+        private Label label23;
+        private Label swapStatsTxCountAB_lbl;
+        private GroupBox groupBox16;
+        private Label label29;
+        private Label label25;
+        private TextBox swapTestTxSize;
     }
 }
 

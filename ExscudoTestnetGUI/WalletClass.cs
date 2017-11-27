@@ -6,8 +6,10 @@ namespace ExscudoTestnetGUI
     {
         public WalletClass()
         {
-            ConfigJson = new configClass();
-            ConfigJson.Payouts = new configClass.Payouts2();
+            ConfigJson = new configClass
+            {
+                Payouts = new configClass.Payouts2()
+            };
 
             NickName = "";
             Seed = "";

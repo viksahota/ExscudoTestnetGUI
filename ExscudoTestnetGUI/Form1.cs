@@ -23,17 +23,21 @@ namespace ExscudoTestnetGUI
         private List<WalletClass> _walletList = new List<WalletClass>();
         private WalletClass _mainWallet = new WalletClass();
 
-        // This delegates enable asynchronous calls to gui from other threads
+        //create an object for swapTest data
+        private SwapTestDataClass _swapData = new SwapTestDataClass();
+
+        // These delegates enable asynchronous calls to gui from other threads
         private delegate void SetDebugCallback(string text);
         private delegate void SetDebugClearCallback();
         private delegate void SetLogCallback(string text);
         private delegate void SetInfTextCallback(string text);
         private delegate void SetConfigUpdateCallback(int index);
         private delegate void SetAccountInfoCallback(string infoResponse);
-
         private delegate void SetUpdateCommitedCallback(string text);
         private delegate void SetSyncGuiBalancesCallback();
         private delegate void SetSelectedAccountCallback(int index);
+        private delegate void SetUpdateSwapTestAccountLisCallback();
+        private delegate void SetUpdateSwapTestGUICallback();
 
         //define a thread which will process away from form thread.
         private Thread _eonThread;
@@ -41,6 +45,10 @@ namespace ExscudoTestnetGUI
         private readonly bool _os64Bit;
         //so we know when the selected wallet is really changed, can be spurious events
         private int _lastWalletIndex = -1;
+
+        //define a thread dedicated to swapTest
+        private Thread _swapTestThread;
+        private bool _swapTestThreadRun = true;
 
         private readonly string _appPath;
                 
@@ -142,6 +150,10 @@ namespace ExscudoTestnetGUI
 
             //populate the account list & select the primary account
             accountLV.SetObjects(_walletList);
+
+            //update the account lists on the transaction-swap test tab
+            UpdateSwapTestAccountList();
+
             SetSelectedAccount(0);
             SyncGuiBalances();
             
@@ -169,6 +181,24 @@ namespace ExscudoTestnetGUI
                 }
 
             }
+        }
+
+        private void UpdateSwapTestAccountList()
+        {
+            if (swapAccountA_CB.InvokeRequired)
+            {
+                SetUpdateSwapTestAccountLisCallback d = UpdateSwapTestAccountList;
+                Invoke(d, new object[] { });
+            }
+            else
+            {
+                foreach (WalletClass wal in _walletList)
+                {
+                    swapAccountA_CB.Items.Add(wal.NickName + " : " + wal.AccountID);
+                    swapAccountB_CB.Items.Add(wal.NickName + " : " + wal.AccountID);
+                }
+            }
+
         }
 
         private void GetAttachedAccounts()
@@ -451,6 +481,10 @@ namespace ExscudoTestnetGUI
                 if (depositLBL.Text != _walletList[_selectedWallet].Deposit) depositLBL.Text = _walletList[_selectedWallet].Deposit;
                 if (rxAddressLBL.Text != _walletList[_selectedWallet].AccountID) rxAddressLBL.Text = _walletList[_selectedWallet].AccountID;
                 accountLV.BuildList(true);
+
+                //update the swapTest account balances
+                if (swapAccountA_CB.SelectedIndex >-1) swaptestActBalA_lbl.Text = _walletList[swapAccountA_CB.SelectedIndex].Balance;
+                if (swapAccountB_CB.SelectedIndex >-1) swaptestActBalB_lbl.Text = _walletList[swapAccountB_CB.SelectedIndex].Balance;
 
             }
         }
@@ -1619,29 +1653,6 @@ namespace ExscudoTestnetGUI
                         string rAmount = paymentResultMatch.Groups[2].ToString();
                         string resultS = paymentResultMatch.Groups[3].ToString();
 
-                        /*
-                        //strip the generic stuff
-                        txResp = txResp.Substring(txResp.IndexOf("Ordinary"), txResp.IndexOf("end...") - txResp.IndexOf("Ordinary"));
-
-                        //get the reported amount
-                        int ind1 = txResp.IndexOf("Amount:") + 7;
-                        int ind2 = txResp.IndexOf("\r\n", ind1);
-
-                        string rAmount = txResp.Substring(ind1, ind2 - ind1);
-
-                        //get the recipient account
-                        int ind5 = txResp.IndexOf("account:") + 8;
-                        int ind6 = txResp.IndexOf("\r\n", ind5);
-
-                        string rAccount = txResp.Substring(ind5, ind6 - ind5);
-
-
-                        //get the result
-                        int ind3 = txResp.IndexOf("\"") + 1;
-                        int ind4 = txResp.LastIndexOf("\"");
-                        string resultS = txResp.Substring(ind3, ind4 - ind3);
-                        */
-
                         //MessageBox.Show();
                         using (new DialogCenteringService(this))
                         {
@@ -1910,7 +1921,241 @@ namespace ExscudoTestnetGUI
                 logTB.ScrollToCaret();
                 logTB.Update();
             }
+
+            //test tab selected
+            if (tabControl1.SelectedIndex == 4)
+            {
+
+            }
         }
+
+        private void SwapAccountA_CB_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            //update the balance display according to the selected items
+            swaptestActBalA_lbl.Text = _walletList[swapAccountA_CB.SelectedIndex].Balance;
+        }
+
+        private void SwapAccountB_CB_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            //update the balance display according to the selected items
+            swaptestActBalB_lbl.Text = _walletList[swapAccountB_CB.SelectedIndex].Balance;
+        }
+
+        //update the GUI fields on the swap-test tab
+        private void UpdateSwapTestGUI()
+        {
+            if (swapAccountA_CB.InvokeRequired)
+            {
+                SetUpdateSwapTestGUICallback d = UpdateSwapTestGUI;
+                Invoke(d, new object[] { });
+            }
+            else
+            {
+                swaptestStartBalA_lbl.Text = _swapData.StartBalanceA.ToString();
+                swaptestStartBalB_lbl.Text = _swapData.StartBalanceB.ToString();
+                swaptestSentA_lbl.Text = _swapData.SentA.ToString();
+                swaptestSentB_lbl.Text = _swapData.SentB.ToString();
+                swaptestFeesA_lbl.Text = _swapData.FeesA.ToString();
+                swaptestFeesB_lbl.Text = _swapData.FeesB.ToString();
+                swaptestIncomingA_lbl.Text = _swapData.IncomingA.ToString();
+                swaptestIncomingB_lbl.Text = _swapData.IncomingB.ToString();
+                swaptestExpBalA_lbl.Text = _swapData.ExpectedBalanceA.ToString();
+                swaptestExpBalB_lbl.Text = _swapData.ExpectedBalanceB.ToString();
+                swaptestActBalA_lbl.Text = _swapData.ActualBalanceA.ToString();
+                swaptestActBalB_lbl.Text = _swapData.ActualBalanceB.ToString();
+                swapStatsTxCountAB_lbl.Text = _swapData.TxCountAB.ToString();
+                swapStatsTxCountBA_lbl.Text = _swapData.TxCountBA.ToString();
+                swapStatsPendingA_lbl.Text = _swapData.PendingTX_A.ToString();
+                swapStatsPendingB_lbl.Text = _swapData.PendingTX_B.ToString();
+                swapStatsTotalTX_lbl.Text = _swapData.TotalTransactions.ToString();
+                swapStatsTXFails_lbl.Text = _swapData.FailedTransactions.ToString();
+                swapStatsTestDuration_lbl.Text = _swapData.TestDuration.Days.ToString() + " Days , " + _swapData.TestDuration.Hours.ToString() + ":" + _swapData.TestDuration.Minutes.ToString() + ":" + _swapData.TestDuration.Seconds.ToString();
+                swapStatsTXRate_lbl.Text = _swapData.TransactionRate.ToString();
+                swapTestTxSize.Text = _swapData.TransactionSize.ToString();
+
+
+
+            }
+        }
+
+        //start the swapTest
+        private void SwapTestStart_BTN_Click(object sender, EventArgs e)
+        {
+            //record the selected account ID's
+            _swapData.AccountIndex_A = swapAccountA_CB.SelectedIndex;
+            _swapData.AccountIndex_B = swapAccountB_CB.SelectedIndex;
+
+
+            //start a new thread to run the swapTestprocess with
+            //start the eon thread
+
+            _swapTestThreadRun = true;
+
+            _swapTestThread = new Thread(SwapTestThreadStart);
+            _swapTestThread.SetApartmentState(ApartmentState.STA);
+            _swapTestThread.Start();
+
+
+        }
+
+        public void SwapTestThreadStart()
+        {
+            DebugLogMsg("SwapTestThread started...\r\n");
+            _swapData.IsRunning = true;
+
+            //record the starting balances
+            _swapData.StartBalanceA = Convert.ToDouble(_walletList[_swapData.AccountIndex_A].Balance);
+            _swapData.StartBalanceB = Convert.ToDouble(_walletList[_swapData.AccountIndex_B].Balance);
+
+            //setup the expected & actual balances
+            _swapData.ExpectedBalanceA = _swapData.ActualBalanceA = _swapData.StartBalanceA;
+            _swapData.ExpectedBalanceB = _swapData.ActualBalanceB = _swapData.StartBalanceB;
+
+            //set the test start time
+            _swapData.StartTimeStamp = DateTime.Now;
+
+            bool failureDetect = false;
+
+            DateTime lastGUIUpdateDT = DateTime.Now;
+
+            while ((!failureDetect)&&(_swapTestThreadRun))
+            {
+
+                //send swap transactions
+                bool sendResA = SendPayment(_swapData.AccountIndex_A, _swapData.AccountIndex_B);
+
+                if (sendResA)
+                {
+                    //update stats
+                    _swapData.SentA += _swapData.TransactionSize;
+                    _swapData.FeesA += 0.000010;
+                    _swapData.IncomingB += _swapData.TransactionSize;
+                    _swapData.ExpectedBalanceA = _swapData.StartBalanceA - _swapData.SentA - _swapData.FeesA;
+                    _swapData.TxCountAB += 1;
+                    _swapData.TotalTransactions += 1;
+
+                    bool sendRes2 = SendPayment(_swapData.AccountIndex_B, _swapData.AccountIndex_A);
+
+                    if (sendRes2)
+                    {
+                        _swapData.SentB += _swapData.TransactionSize;
+                        _swapData.FeesB += 0.000010;
+                        _swapData.IncomingA += _swapData.TransactionSize;
+                        _swapData.ExpectedBalanceB = _swapData.StartBalanceB - _swapData.SentB - _swapData.FeesB + _swapData.IncomingB;
+                        _swapData.TxCountBA += 1;
+                        _swapData.TotalTransactions += 1;
+
+                        //update transaction rate
+                        TimeSpan elapsed = DateTime.Now - _swapData.StartTimeStamp;
+                        _swapData.TransactionRate = (decimal)(_swapData.TotalTransactions / elapsed.TotalSeconds);
+
+                        //update accountA now that we have incomingA
+                        _swapData.ExpectedBalanceA = _swapData.StartBalanceA - _swapData.SentA - _swapData.FeesA + _swapData.IncomingA;
+
+                    }
+                    else
+                    {
+                        //update accountA now that we have incomingA
+                        _swapData.ExpectedBalanceA = _swapData.StartBalanceA - _swapData.SentA - _swapData.FeesA;
+                        _swapData.FailedTransactions++;
+                        failureDetect = true;
+
+                    }
+
+                }
+                else
+                {
+                    _swapData.FailedTransactions++;
+                    failureDetect = true;
+                }
+
+
+                //update the test duration
+                _swapData.TestDuration = DateTime.Now - _swapData.StartTimeStamp;
+
+
+                //update the GUI periodically
+                if (DateTime.Now - lastGUIUpdateDT > TimeSpan.FromSeconds(1))
+                {
+                    UpdateSwapTestGUI();
+                    lastGUIUpdateDT = DateTime.Now;
+                }
+
+                Thread.Sleep(100);
+            }
+
+            UpdateSwapTestGUI();
+            _swapData.IsRunning = false;
+            DebugLogMsg("SwapTestThread stopped\r\n");
+
+
+        }
+
+
+        private bool SendPayment(int senderIndex, int receiverIndex)
+        {
+            bool result = false;
+
+            string txResp = EonCMD(senderIndex, "eon payment " + _walletList[receiverIndex].AccountID + " " + _swapData.TransactionSize.ToString());
+
+            if (txResp != "-1")
+            {
+                try
+                {
+
+                    //extract the values
+                    string pattern = @"account:([^\s]*)\s*Amount:\s(\d*.\d*)\s*([^\n]*)";
+                    Match paymentResultMatch = Regex.Match(txResp, pattern);
+
+                    string rAccount = paymentResultMatch.Groups[1].ToString();
+                    string rAmount = paymentResultMatch.Groups[2].ToString();
+                    string resultS = paymentResultMatch.Groups[3].ToString();
+                    resultS.Trim();
+
+                    if (resultS.Contains("success")) result = true;
+
+                }
+                catch (Exception ex)
+                {
+                    DebugMsg("Exception parsing send response" + ex.Message + "\r\n");
+                    LogMsg("Exception parsing send response" + ex.Message + "\r\n");
+                }
+            }
+            else
+            {
+                DebugMsg("Send failed : " + txResp + "\r\n");
+                LogMsg("Send failed  : " + txResp + "\r\n");
+            }
+
+            return result;
+
+        }
+
+
+        private void SwapTestStop_BTN_Click(object sender, EventArgs e)
+        {
+            _swapTestThreadRun = false;
+        }
+        
+        //update the swapData if the user changes the transaction size
+        private void SwapTestTxSize_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                if (!_swapData.IsRunning) _swapData.TransactionSize = Convert.ToDouble(swapTestTxSize.Text);
+            }
+           catch(Exception ex)
+            {                
+            }
+        }
+
+        private void SwapTestReset_BTN_Click(object sender, EventArgs e)
+        {
+            if (!_swapData.IsRunning) _swapData = new SwapTestDataClass();
+            UpdateSwapTestGUI();
+        }
+
+
     }
 
 
