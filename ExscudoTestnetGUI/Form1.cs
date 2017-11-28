@@ -1995,6 +1995,10 @@ namespace ExscudoTestnetGUI
             _swapTestThread.SetApartmentState(ApartmentState.STA);
             _swapTestThread.Start();
 
+            swapTestStart_BTN.Enabled = false;
+            swapTestStop_BTN.Enabled = true;
+            swapTestReset_BTN.Enabled = false;
+
 
         }
 
@@ -2058,7 +2062,7 @@ namespace ExscudoTestnetGUI
                         //update accountA now that we have incomingA
                         _swapData.ExpectedBalanceA = _swapData.StartBalanceA - _swapData.SentA - _swapData.FeesA;
                         _swapData.FailedTransactions++;
-                        failureDetect = true;
+                        
 
                     }
 
@@ -2066,7 +2070,7 @@ namespace ExscudoTestnetGUI
                 else
                 {
                     _swapData.FailedTransactions++;
-                    failureDetect = true;
+                    
                 }
 
 
@@ -2135,6 +2139,9 @@ namespace ExscudoTestnetGUI
         private void SwapTestStop_BTN_Click(object sender, EventArgs e)
         {
             _swapTestThreadRun = false;
+            swapTestStart_BTN.Enabled = false;
+            swapTestStop_BTN.Enabled = false;
+            swapTestReset_BTN.Enabled = true;
         }
         
         //update the swapData if the user changes the transaction size
@@ -2149,10 +2156,14 @@ namespace ExscudoTestnetGUI
             }
         }
 
+
         private void SwapTestReset_BTN_Click(object sender, EventArgs e)
         {
             if (!_swapData.IsRunning) _swapData = new SwapTestDataClass();
             UpdateSwapTestGUI();
+            swapTestStart_BTN.Enabled = true;
+            swapTestStop_BTN.Enabled = false;
+            swapTestReset_BTN.Enabled = false;
         }
 
 

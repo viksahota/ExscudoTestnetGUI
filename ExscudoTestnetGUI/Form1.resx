@@ -117,6 +117,30 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="label33.Text" xml:space="preserve">
+    <value>1. Create or have ready TWO accounts which will be used.  Make sure BOTH accounts have adequate EON (eg 100 EON balance each)
+2. Select these accounts as Accounts A and B.
+3. Press Start.
+
+The test will now send an equal amount A-&gt;B and B-&gt;A, carrying out these transactions in pairs and repeating this until failure.
+The expected balance is calculated using the starting balance, sent amounts and fees paid, as well as the expected incoming EON from the other account.
+
+Expected balance normally shows slightly different to the actual balance during normal test operation (since transactions take time to become confirmed and reflect in balance)
+
+After the test is STOPPED , allow several minutes to elapse for remaining tranasactions to confirm - then the Expected and Actual should become equal - when these figures tally we know no transactions went amiss, everything is accounted for.
+
+Do not start / restart the test while there are still unconfirmed transactions on account A or B.
+
+Avoid trying to view confirmed transactions on these accounts - since the entries can run into thousands this takes a LONG time to render.
+Viewing unconfirmed transactions on these accounts is OK.
+
+Extra: 
+If you are running a node you can adjust the PEER in config for these accounts, so they send transactions via your node on the internal network or public IP.
+
+Example:
+Primary account is used for node / staking. There is generous DEPOSIT balance.  Secondary account becomes Account A for our test, credited with 100 EON.  Third account becomes Account B for our test, also credited with 100 EON
+By changing the CONFIG/PEER to local IP &amp; port of your test node (eg 192.180.0.102:9443 ) for both accounts A and B, the transactions on these accounts are then routed via your node and into the EON peer network.</value>
+  </data>
   <metadata name="swapAccountA_CB.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
   </metadata>

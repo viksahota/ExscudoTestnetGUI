@@ -32,6 +32,7 @@ namespace ExscudoTestnetGUI
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.debugTB = new System.Windows.Forms.TextBox();
             this.commitBTN = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
@@ -111,6 +112,8 @@ namespace ExscudoTestnetGUI
             this.logTB = new System.Windows.Forms.TextBox();
             this.testTab = new System.Windows.Forms.TabPage();
             this.groupBox13 = new System.Windows.Forms.GroupBox();
+            this.groupBox17 = new System.Windows.Forms.GroupBox();
+            this.label33 = new System.Windows.Forms.Label();
             this.groupBox16 = new System.Windows.Forms.GroupBox();
             this.label29 = new System.Windows.Forms.Label();
             this.label25 = new System.Windows.Forms.Label();
@@ -183,6 +186,7 @@ namespace ExscudoTestnetGUI
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.linkLabel1 = new System.Windows.Forms.LinkLabel();
             this.groupBox1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.walletTab.SuspendLayout();
@@ -211,6 +215,7 @@ namespace ExscudoTestnetGUI
             this.logTab.SuspendLayout();
             this.testTab.SuspendLayout();
             this.groupBox13.SuspendLayout();
+            this.groupBox17.SuspendLayout();
             this.groupBox16.SuspendLayout();
             this.groupBox15.SuspendLayout();
             this.groupBox14.SuspendLayout();
@@ -1091,6 +1096,7 @@ namespace ExscudoTestnetGUI
             // 
             // groupBox13
             // 
+            this.groupBox13.Controls.Add(this.groupBox17);
             this.groupBox13.Controls.Add(this.groupBox16);
             this.groupBox13.Controls.Add(this.groupBox15);
             this.groupBox13.Controls.Add(this.groupBox14);
@@ -1116,12 +1122,32 @@ namespace ExscudoTestnetGUI
             this.groupBox13.Controls.Add(this.swapAccountA_CB);
             this.groupBox13.Controls.Add(this.label14);
             this.groupBox13.ForeColor = System.Drawing.Color.Black;
-            this.groupBox13.Location = new System.Drawing.Point(264, 23);
+            this.groupBox13.Location = new System.Drawing.Point(16, 23);
             this.groupBox13.Name = "groupBox13";
-            this.groupBox13.Size = new System.Drawing.Size(947, 940);
+            this.groupBox13.Size = new System.Drawing.Size(1482, 1016);
             this.groupBox13.TabIndex = 0;
             this.groupBox13.TabStop = false;
             this.groupBox13.Text = "Swap-transaction generator";
+            // 
+            // groupBox17
+            // 
+            this.groupBox17.Controls.Add(this.linkLabel1);
+            this.groupBox17.Controls.Add(this.label33);
+            this.groupBox17.Location = new System.Drawing.Point(938, 25);
+            this.groupBox17.Name = "groupBox17";
+            this.groupBox17.Size = new System.Drawing.Size(548, 985);
+            this.groupBox17.TabIndex = 33;
+            this.groupBox17.TabStop = false;
+            this.groupBox17.Text = "Help";
+            // 
+            // label33
+            // 
+            this.label33.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label33.Location = new System.Drawing.Point(11, 22);
+            this.label33.Name = "label33";
+            this.label33.Size = new System.Drawing.Size(527, 888);
+            this.label33.TabIndex = 1;
+            this.label33.Text = resources.GetString("label33.Text");
             // 
             // groupBox16
             // 
@@ -1133,7 +1159,7 @@ namespace ExscudoTestnetGUI
             this.groupBox16.Controls.Add(this.swapTestStart_BTN);
             this.groupBox16.Location = new System.Drawing.Point(10, 660);
             this.groupBox16.Name = "groupBox16";
-            this.groupBox16.Size = new System.Drawing.Size(918, 192);
+            this.groupBox16.Size = new System.Drawing.Size(922, 128);
             this.groupBox16.TabIndex = 32;
             this.groupBox16.TabStop = false;
             this.groupBox16.Text = "Control";
@@ -1168,8 +1194,9 @@ namespace ExscudoTestnetGUI
             // 
             // swapTestStop_BTN
             // 
+            this.swapTestStop_BTN.Enabled = false;
             this.swapTestStop_BTN.ForeColor = System.Drawing.Color.Black;
-            this.swapTestStop_BTN.Location = new System.Drawing.Point(713, 89);
+            this.swapTestStop_BTN.Location = new System.Drawing.Point(608, 29);
             this.swapTestStop_BTN.Name = "swapTestStop_BTN";
             this.swapTestStop_BTN.Size = new System.Drawing.Size(162, 37);
             this.swapTestStop_BTN.TabIndex = 6;
@@ -1179,8 +1206,9 @@ namespace ExscudoTestnetGUI
             // 
             // swapTestReset_BTN
             // 
+            this.swapTestReset_BTN.Enabled = false;
             this.swapTestReset_BTN.ForeColor = System.Drawing.Color.Black;
-            this.swapTestReset_BTN.Location = new System.Drawing.Point(783, 135);
+            this.swapTestReset_BTN.Location = new System.Drawing.Point(806, 29);
             this.swapTestReset_BTN.Name = "swapTestReset_BTN";
             this.swapTestReset_BTN.Size = new System.Drawing.Size(92, 37);
             this.swapTestReset_BTN.TabIndex = 31;
@@ -1191,7 +1219,7 @@ namespace ExscudoTestnetGUI
             // swapTestStart_BTN
             // 
             this.swapTestStart_BTN.ForeColor = System.Drawing.Color.Black;
-            this.swapTestStart_BTN.Location = new System.Drawing.Point(713, 46);
+            this.swapTestStart_BTN.Location = new System.Drawing.Point(417, 30);
             this.swapTestStart_BTN.Name = "swapTestStart_BTN";
             this.swapTestStart_BTN.Size = new System.Drawing.Size(162, 37);
             this.swapTestStart_BTN.TabIndex = 5;
@@ -1908,6 +1936,16 @@ namespace ExscudoTestnetGUI
             this.panel1.Size = new System.Drawing.Size(1549, 50);
             this.panel1.TabIndex = 14;
             // 
+            // linkLabel1
+            // 
+            this.linkLabel1.AutoSize = true;
+            this.linkLabel1.Location = new System.Drawing.Point(91, 859);
+            this.linkLabel1.Name = "linkLabel1";
+            this.linkLabel1.Size = new System.Drawing.Size(343, 20);
+            this.linkLabel1.TabIndex = 2;
+            this.linkLabel1.TabStop = true;
+            this.linkLabel1.Text = "https://testnet.eontechnology.org/peermap.html";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
@@ -1965,6 +2003,8 @@ namespace ExscudoTestnetGUI
             this.testTab.ResumeLayout(false);
             this.groupBox13.ResumeLayout(false);
             this.groupBox13.PerformLayout();
+            this.groupBox17.ResumeLayout(false);
+            this.groupBox17.PerformLayout();
             this.groupBox16.ResumeLayout(false);
             this.groupBox16.PerformLayout();
             this.groupBox15.ResumeLayout(false);
@@ -2133,6 +2173,9 @@ namespace ExscudoTestnetGUI
         private Label label29;
         private Label label25;
         private TextBox swapTestTxSize;
+        private GroupBox groupBox17;
+        private Label label33;
+        private LinkLabel linkLabel1;
     }
 }
 
