@@ -3,12 +3,13 @@
 
 using Newtonsoft.Json;
 
+
 namespace ExscudoTestnetGUI
 {
 
     internal partial class commitClass
     {
-        internal class Attachment2
+        internal class Attachment
         {
 
             [JsonProperty("amount")]
@@ -25,6 +26,8 @@ namespace ExscudoTestnetGUI
     {
         public class All2
         {
+            [JsonProperty("version")]
+            public int Version { get; set; }
 
             [JsonProperty("type")]
             public int Type { get; set; }
@@ -51,7 +54,7 @@ namespace ExscudoTestnetGUI
             public string Signature { get; set; }
 
             [JsonProperty("attachment")]
-            public Attachment2 Attachment { get; set; }
+            public Attachment Attachment { get; set; }
         }
     }
 
@@ -63,3 +66,4 @@ namespace ExscudoTestnetGUI
     }
 
 }
+

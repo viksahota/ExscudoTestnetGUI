@@ -11,6 +11,7 @@
 
 		"peer": "peer.testnet.eontechnology.org:9443",
 		"seed": "<SEED>",
+		"last_tr_log": "",
 
 		"deadline": 60,
 		"fee": 10,

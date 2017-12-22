@@ -22,7 +22,7 @@ Command     | Description
 refill      | Transfer coins from amount to deposit
 withdraw    | Transfer coins from deposit to amount
 payment     | Transfer/Send coins to another account
-new_account | Create a new network account using its public key
+register    | Create a new network account using its public key
 commited    | Output the list of transactions entered the blockchain
 uncommited  | Output the list of transactions that did not enter the blockchain
 allcommited | Output all lists of transactions entered the blockchain
@@ -38,7 +38,7 @@ A brief hint with a list of possible commands to use:
 user@pc:~/EON$ ./eon
 Client for EON peer, 2017 v0.11
 command available to use:
-refill, withdraw, payment, new_account
+refill, withdraw, payment, register
 commited, uncommited, allcommited, state, attributes, info, seed
 
 end...
@@ -55,7 +55,7 @@ The current user account from the configuration file will be used by default.
 user@pc:~/EON$ ./eon state
 Client for EON peer, 2017 v0.11
 command available to use:
-refill, withdraw, payment, new_account
+refill, withdraw, payment, register
 commited, uncommited, allcommited, state, attributes, info, seed
 
 Answer on get state for  EON-QB3PM-Y3MRM-28TFL
@@ -73,7 +73,7 @@ You can check any network account state with its eon_id.
 user@pc:~/EON$ ./eon state EON-2NTFF-EVEMG-7MBAL
 Client for EON peer, 2017 v0.11
 command available to use:
-refill, withdraw, payment, new_account
+refill, withdraw, payment, register
 commited, uncommited, allcommited, state, attributes, info, seed
 
 Answer on get state for  EON-2NTFF-EVEMG-7MBAL
@@ -93,7 +93,7 @@ A string of random symbols is created and on its bases EON_id and public key are
 user@pc:~/EON$ ./eon seed
 Client for EON peer, 2017 v0.11
 command available to use:
-refill, withdraw, payment, new_account
+refill, withdraw, payment, register
 commited, uncommited, allcommited, state, attributes, info, seed
  
 Generate seed for EON account 
@@ -113,7 +113,7 @@ The command "info" output EON_id and the public key needed to register the netwo
 user@pc:~/EON$ ./eon info
 Client for EON peer, 2017 v0.11
 command available to use:
-refill, withdraw, payment, new_account
+refill, withdraw, payment, register
 commited, uncommited, allcommited, state, attributes, info, seed
  
 EON account from seed
@@ -125,16 +125,16 @@ end...
 
 ---
 
-### eon new_account
+### eon register
 
 After you had registered on the network you can create additional accounts on your behalf.
 The public key for the new account is set in the account creation function parameters.
 You can get it using the function < eon info > or < eon info new_SEED >.
 ```
-user@pc:~/EON$ ./eon new_account fef59c1f61aa10fe9ab8bf0d733d1baf72e6aabf0eabc31511a18aa537733d2b
+user@pc:~/EON$ ./eon register fef59c1f61aa10fe9ab8bf0d733d1baf72e6aabf0eabc31511a18aa537733d2b
 Client for EON peer, 2017 v0.11
 command available to use:
-refill, withdraw, payment, new_account
+refill, withdraw, payment, register
 commited, uncommited, allcommited, state, attributes, info, seed
  
 Create new EON account
@@ -164,7 +164,7 @@ Transfer coins from ammount to depisit
 user@pc:~/EON$ ./eon refill 100
 Client for EON peer, 2017 v0.11
 command available to use:
-refill, withdraw, payment, new_account
+refill, withdraw, payment, register
 commited, uncommited, allcommited, state, attributes, info, seed
 
 Deposit refill, deposit funds to participate in the generation of blocks
@@ -181,7 +181,7 @@ Transfer coins from deposit to ammount
 user@pc:~/EON$ ./eon withdraw 50
 Client for EON peer, 2017 v0.11
 command available to use:
-refill, withdraw, payment, new_account
+refill, withdraw, payment, register
 commited, uncommited, allcommited, state, attributes, info, seed
 
 Deposit withdraw, stop participating in the generation of blocks
@@ -198,7 +198,7 @@ Transfer/send coins to another account.
 user@pc:~/EON$ ./eon payment EON-5VXV4-AFZEZ-7Y4FV 1000
 Client for EON peer, 2017 v0.11
 command available to use:
-refill, withdraw, payment, new_account
+refill, withdraw, payment, register
 commited, uncommited, allcommited, state, attributes, info, seed
 
 Ordinary payment, transfer of coins between two accounts
@@ -220,7 +220,7 @@ If you do not input Eon_id, the command will display information for the account
 user@pc:~/EON$ ./eon commited
 Client for EON peer, 2017 v0.11
 command available to use:
-refill, withdraw, payment, new_account
+refill, withdraw, payment, register
 commited, uncommited, allcommited, state, attributes, info, seed
 
 Answer on get commited transactions for EON-QB3PM-Y3MRM-28TFL, page 1 
@@ -257,7 +257,7 @@ You can input EON_id after the command "uncommited" ("commited" or "allcommited"
 user@pc:~/EON$ ./eon commited  EON-QB3PM-Y3MRM-28TFL
 Client for EON peer, 2017 v0.11
 command available to use:
-refill, withdraw, payment, new_account
+refill, withdraw, payment, register
 commited, uncommited, allcommited, state, attributes, info, seed
 
 Answer on get commited transactions for EON-QB3PM-Y3MRM-28TFL, page 1 
@@ -296,7 +296,7 @@ You can input page number put number after the command "commited" to view select
 user@pc:~/EON$ ./eon commited EON-QB3PM-Y3MRM-28TFL 2
 Client for EON peer, 2017 v0.11
 command available to use:
-refill, withdraw, payment, new_account
+refill, withdraw, payment, register
 commited, uncommited, allcommited, state, attributes, info, seed
 
 Answer on get commited transactions page for EON-QB3PM-Y3MRM-28TFL, page 2 
@@ -322,7 +322,7 @@ You can view all transactions you ever made and which has been included the bloc
 user@pc:~/EON$ ./eon allcommited
 Client for EON peer, 2017 v0.11
 command available to use:
-refill, withdraw, payment, new_account
+refill, withdraw, payment, register
 commited, uncommited, allcommited, state, attributes, info, seed
 
 

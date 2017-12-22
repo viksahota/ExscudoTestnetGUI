@@ -217,8 +217,15 @@ namespace ExscudoTestnetGUI
                     string jsonResponse = commitResponse.Substring(ind1, (ind2 - ind1 + 1));
 
                     //output may be broken up through pagination of results introduced in eon 0.12. Try and remove <nil> seperators before deserialising..
-                    string pagePattern = @"}\s*]\s*}\s*<nil>\s*{\s*""all"":\s\[\s*{";
+                    //string pagePattern = @"}\s*]\s*}\s*<nil>\s*{\s*""all"":\s\[\s*{";
+
+                    //updated for 0.14 client
+                    string pagePattern =  @"}\s*]\s*<nil>\s*\[\s*{";
+
                     jsonResponse = Regex.Replace(jsonResponse, pagePattern, "},\n{");
+
+                    //add header and tail sections to make it into a correct json to deserialize. In 0.14 client the All: Tag which preceeds the lst of commit entries, was dropped presumably to cleanup the output visually.
+                    jsonResponse = "{\n\"all\": [" + jsonResponse + "\n]\n}";
 
                     //deserialise the response
                     var oResp = JsonConvert.DeserializeObject<commitClass>(jsonResponse);
@@ -356,13 +363,13 @@ namespace ExscudoTestnetGUI
                 {
 
                     //Match stateMatches = Regex.Match(stateResponse, @"state:\s*(\d*).*\s*Amount:\s*(.*)\s*Deposit:\s*(.*)\s*end...");
+                      string pattern = @"""code"": (\d*),\s*""name"":\s""([^""]*)""\s*},\s*""public_key"":\s""([^""]*)""\s*,\s*""seed"":\s([^,]*),\s*""amount"":\s([^,]*),\s*""deposit"":\s([^,]*),\s*""sign_type"":\s""([^""]*)""\s*,\s*""voting_rights"":\s([^,]*),\s*""quorum"":\s([^,]*),\s*""voter"":\s([^\s]*)\s*";
 
-                    string pattern = @"""code"": (\d*),\s*""name"": ""([^""]*)""\s*},\s*""amount"": (\d*),\s*""deposit"": (\d*)\s*}";
                     Match stateMatches = Regex.Match(stateResponse,pattern);
                     
 
                     //if we have a valid match , extract the items into a stateResponse object
-                    if (stateMatches.Groups.Count == 5)
+                    if (stateMatches.Groups.Count == 11)
                     {
                         //recover the parameters
                         int code = Convert.ToInt16(stateMatches.Groups[1].ToString());
@@ -414,11 +421,12 @@ namespace ExscudoTestnetGUI
                     try
                     {
                         //Match stateMatches = Regex.Match(stateResponse, @"state:\s*(\d*).*\s*Amount:\s*(.*)\s*Deposit:\s*(.*)\s*end...");
-                        string pattern = @"""code"": (\d*),\s*""name"": ""([^""]*)""\s*},\s*""amount"": (\d*),\s*""deposit"": (\d*)\s*}";
+                        //string pattern = @"""code"": (\d*),\s*""name"": ""([^""]*)""\s*},\s*""amount"": (\d*),\s*""deposit"": (\d*)\s*}";
+                        string pattern = @"""code"": (\d*),\s*""name"":\s""([^""]*)""\s*},\s*""public_key"":\s""([^""]*)""\s*,\s*""seed"":\s([^,]*),\s*""amount"":\s([^,]*),\s*""deposit"":\s([^,]*),\s*""sign_type"":\s""([^""]*)""\s*,\s*""voting_rights"":\s([^,]*),\s*""quorum"":\s([^,]*),\s*""voter"":\s([^\s]*)\s*";
                         Match stateMatches = Regex.Match(stateResponse, pattern);
 
                         //if we have a valid match , extract the items into a stateResponse object
-                        if (stateMatches.Groups.Count == 5)
+                        if (stateMatches.Groups.Count == 11)
                         {
                             //recover the parameters
                             int code = Convert.ToInt16(stateMatches.Groups[1].ToString());
@@ -427,8 +435,8 @@ namespace ExscudoTestnetGUI
                             if (code == 200)
                             {
                                 //update wallet object
-                                _walletList[i].Balance = (Convert.ToDecimal(stateMatches.Groups[3].ToString()) / 1000000).ToString(CultureInfo.InvariantCulture);
-                                _walletList[i].Deposit = (Convert.ToDecimal(stateMatches.Groups[4].ToString()) / 1000000).ToString(CultureInfo.InvariantCulture);
+                                _walletList[i].Balance = (Convert.ToDecimal(stateMatches.Groups[5].ToString()) / 1000000).ToString(CultureInfo.InvariantCulture);
+                                _walletList[i].Deposit = (Convert.ToDecimal(stateMatches.Groups[6].ToString()) / 1000000).ToString(CultureInfo.InvariantCulture);
                             }
                             else if (code == 404)
                             {
@@ -571,7 +579,7 @@ namespace ExscudoTestnetGUI
                             }
                             else
                             {
-                                File.WriteAllBytes(_appPath + @"\eon" + instance + @"\eon.exe", Resources.eon32);
+                                File.WriteAllBytes(_appPath + @"\eon" + instance + @"\eon.exe", Resources.eon64);
                                 if (instance == 0) DebugLogMsg("eon (x32) deployed\r\n");
                             }
 
@@ -907,8 +915,14 @@ namespace ExscudoTestnetGUI
                             string jsonResponse = commitResponse.Substring(ind1, (ind2 - ind1 + 1));
 
                             //output may be broken up through pagination of results introduced in eon 0.12. Try and remove <nil> seperators before deserialising..
-                            string pagePattern = @"}\s*]\s*}\s*<nil>\s*{\s*""all"":\s\[\s*{";
+                            //string pagePattern = @"}\s*]\s*}\s*<nil>\s*{\s*""all"":\s\[\s*{";
+
+                            //updated for 0.14 client
+                            string pagePattern = @"}\s*]\s*<nil>\s*\[\s*{";
                             jsonResponse = Regex.Replace(jsonResponse, pagePattern, "},\n{");
+
+                            //add header and tail sections to make it into a correct json to deserialize. In 0.14 client the All: Tag which preceeds the lst of commit entries, was dropped presumably to cleanup the output visually.
+                            jsonResponse = "{\n\"all\": [" + jsonResponse + "\n]\n}";
 
                             //deserialise the response
                             var oResp = JsonConvert.DeserializeObject<commitClass>(jsonResponse);
@@ -1525,7 +1539,9 @@ namespace ExscudoTestnetGUI
                 {
                     try
                     {
-                        string pt = @"Amount:\s(\d*.\d*)\s*([^\n]*)";
+                        //string pt = @"Amount:\s(\d*.\d*)\s*([^\n]*)";
+                        //changed for client 0.14 which now includes detailed json output
+                        string pt = @"Amount:\s(\d*.\d*)\s*[^}]*}}\s*send[^""]*""([^""]*)";
                         Match rfMatch = Regex.Match(refillResp, pt);
 
                         if (rfMatch.Groups.Count == 3)
@@ -1583,7 +1599,9 @@ namespace ExscudoTestnetGUI
                 {
                     try
                     {
-                        string pt = @"Amount:\s(\d*.\d*)\s*([^\n]*)";
+                        //string pt = @"Amount:\s(\d*.\d*)\s*([^\n]*)";
+                        //changed for client 0.14 which now includes detailed json output
+                        string pt = @"Amount:\s(\d*.\d*)\s*[^}]*}}\s*send[^""]*""([^""""]*)";
                         Match wdMatch = Regex.Match(wdResp, pt);
 
                         if (wdMatch.Groups.Count == 3)
@@ -1623,6 +1641,7 @@ namespace ExscudoTestnetGUI
 
         }
 
+        //send payment button
         private void TxSendBTN_Click(object sender, EventArgs e)
         {
             
@@ -1646,7 +1665,10 @@ namespace ExscudoTestnetGUI
                     {
 
                         //extract the values
-                        string pattern = @"account:([^\s]*)\s*Amount:\s(\d*.\d*)\s*([^\n]*)";
+                        //string pattern = @"account:([^\s]*)\s*Amount:\s(\d*.\d*)\s*([^\n]*)";
+                        //changed in 0.14 client as it includes json output and needs treating differently
+                        string pattern = @"account:([^\s]*)\s*Amount:\s(\d*.\d*)[^}]*}}\s*[^""]*""([^""]*)";
+
                         Match paymentResultMatch = Regex.Match(txResp, pattern);
 
                         string rAccount = paymentResultMatch.Groups[1].ToString();
@@ -1870,14 +1892,20 @@ namespace ExscudoTestnetGUI
                 Match srMatch = Regex.Match(seedResponse, pattern);
 
 
-                string seed = srMatch.Groups[1].ToString();
-                string accountId = srMatch.Groups[2].ToString();
-                string publicKey = srMatch.Groups[3].ToString();
+                string seed = srMatch.Groups[1].ToString().Trim();
+                string accountId = srMatch.Groups[2].ToString().Trim();
+                string publicKey = srMatch.Groups[3].ToString().Trim();
 
                 //register this new account (its not primary)
-                string createResponse = EonCMD(0, "eon new_account " + publicKey);
+                //string createResponse = EonCMD(0, "eon new_account " + publicKey);
+
+                //changed for 0.14 client , 'new_account' cli command has changed to 'register'.
+                string createResponse = EonCMD(0, "eon register " + publicKey);
+
                 DebugLogMsg(createResponse);
-                string pattern2 = @"send transaction.*<<\s*""(.*)""";
+                //string pattern2 = @"send transaction.*<<\s*""(.*)""";
+                //modified for client 0.14
+                string pattern2 = @"send transaction,[^""]*""([^""]*)""";
                 Match crMatch = Regex.Match(createResponse, pattern2);
                 string createResult = crMatch.Groups[1].ToString();
                 
@@ -2108,7 +2136,10 @@ namespace ExscudoTestnetGUI
                 {
 
                     //extract the values
-                    string pattern = @"account:([^\s]*)\s*Amount:\s(\d*.\d*)\s*([^\n]*)";
+                    //string pattern = @"account:([^\s]*)\s*Amount:\s(\d*.\d*)\s*([^\n]*)";
+                    //changed in 0.14 client as it includes json output and needs treating differently
+                    string pattern = @"account:([^\s]*)\s*Amount:\s(\d*.\d*)[^}]*}}\s*[^""]*""([^""]*)";
+
                     Match paymentResultMatch = Regex.Match(txResp, pattern);
 
                     string rAccount = paymentResultMatch.Groups[1].ToString();

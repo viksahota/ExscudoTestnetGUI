@@ -158,7 +158,7 @@ namespace ExscudoTestnetGUI
             this.textBox5.ReadOnly = true;
             this.textBox5.Size = new System.Drawing.Size(392, 19);
             this.textBox5.TabIndex = 11;
-            this.textBox5.Text = "XdZwZwmaibBfqHH4Hu3XGpLLe7K1dPaM8d";
+            this.textBox5.Text = "XfNmJyeqCjp559LxMvf6yuZ7dH1a9iMTct";
             this.textBox5.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // label4

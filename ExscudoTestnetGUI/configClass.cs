@@ -23,6 +23,9 @@ namespace ExscudoTestnetGUI
             [JsonProperty("seed")]
             public string Seed { get; set; }
 
+            [JsonProperty("last_tr_log")]
+            public string LastTrLog { get; set; }
+
             [JsonProperty("deadline")]
             public uint Deadline { get; set; }
 

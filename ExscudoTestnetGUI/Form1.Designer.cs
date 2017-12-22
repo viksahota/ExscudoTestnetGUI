@@ -113,6 +113,7 @@ namespace ExscudoTestnetGUI
             this.testTab = new System.Windows.Forms.TabPage();
             this.groupBox13 = new System.Windows.Forms.GroupBox();
             this.groupBox17 = new System.Windows.Forms.GroupBox();
+            this.linkLabel1 = new System.Windows.Forms.LinkLabel();
             this.label33 = new System.Windows.Forms.Label();
             this.groupBox16 = new System.Windows.Forms.GroupBox();
             this.label29 = new System.Windows.Forms.Label();
@@ -186,7 +187,6 @@ namespace ExscudoTestnetGUI
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panel1 = new System.Windows.Forms.Panel();
-            this.linkLabel1 = new System.Windows.Forms.LinkLabel();
             this.groupBox1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.walletTab.SuspendLayout();
@@ -1140,6 +1140,16 @@ namespace ExscudoTestnetGUI
             this.groupBox17.TabStop = false;
             this.groupBox17.Text = "Help";
             // 
+            // linkLabel1
+            // 
+            this.linkLabel1.AutoSize = true;
+            this.linkLabel1.Location = new System.Drawing.Point(91, 859);
+            this.linkLabel1.Name = "linkLabel1";
+            this.linkLabel1.Size = new System.Drawing.Size(343, 20);
+            this.linkLabel1.TabIndex = 2;
+            this.linkLabel1.TabStop = true;
+            this.linkLabel1.Text = "https://testnet.eontechnology.org/peermap.html";
+            // 
             // label33
             // 
             this.label33.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -1935,16 +1945,6 @@ namespace ExscudoTestnetGUI
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(1549, 50);
             this.panel1.TabIndex = 14;
-            // 
-            // linkLabel1
-            // 
-            this.linkLabel1.AutoSize = true;
-            this.linkLabel1.Location = new System.Drawing.Point(91, 859);
-            this.linkLabel1.Name = "linkLabel1";
-            this.linkLabel1.Size = new System.Drawing.Size(343, 20);
-            this.linkLabel1.TabIndex = 2;
-            this.linkLabel1.TabStop = true;
-            this.linkLabel1.Text = "https://testnet.eontechnology.org/peermap.html";
             // 
             // Form1
             // 
